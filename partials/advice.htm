@@ -1,0 +1,40 @@
+<div id="content">
+    <div ng-repeat="tab in tabs" class="tab activetab">{{ tab }}</div>
+    <div class="result">
+        <div id="movie" ng-show="movieDisplay">
+            <youtube-video video-id="ytId" player-vars="playerVars" player-width="'100%'" player-height="'400px'"></youtube-video>
+            <br>
+            <br>
+            <form ng-submit="skipMovie()" ng-if="urlgebied !== 'uitleg'" class="buttoncent">
+                <input type="submit" value="Sla filmpje over" class="btn btn-green">
+            </form>
+            <div class="buttoncent" ng-if="urlgebied == 'uitleg'">
+                <form ng-submit="getFaq()" class="buttoninline">
+                    <input type="submit" value="FAQ" class="btn btn-blue spacer">
+                </form>
+                <form ng-submit="getBack()" class="buttoninline">
+                    <input type="submit" value="Terug naar nulmeting" class="btn btn-green spacer">
+                </form>
+            </div>
+        </div>
+        <div ng-show="coachingDisplay">
+            <div ng-show="persDisplay">
+                <p>Uit de persoonlijkheidstest komt het volgende naar voren:</p>
+                <ul class="box">
+                    <li ng-repeat="p in bulletsP" class="box">{{ p }}</li>
+                </ul>
+            </div>
+            <p>Je geeft aan in de test over {{ gebied }} dat je tegen het volgende aanloopt:</p>
+            <ul class="box">
+                <li ng-repeat="g in bulletsG" class="box">{{ g }}</li>
+            </ul>
+            <p>{{ combotekst }}</p>
+            <ul class="box">
+                <li ng-repeat="r in bulletsR" class="box">{{ r }}</li>
+            </ul>
+            <form ng-submit="getSolution()" class="buttoncent">
+                <input type="submit" value="Start ontwikkelingtraject" class="btn btn-red">
+            </form>
+        </div>
+    </div>
+</div>

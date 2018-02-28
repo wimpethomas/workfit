@@ -1,0 +1,8 @@
+<div id="content">
+    <div ng-repeat="(key, value) in personality" class="result2">
+        <div class="detail"><p>Wat betreft <b>{{ value.name }}</b> geldt voor jou waarschijnlijk het volgende:</p></div>
+        <ul class="box">
+            <li ng-repeat="n in value.traitChars" class="box">{{ n }}</li>
+        </ul>
+    </div>
+</div>

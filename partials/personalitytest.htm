@@ -1,0 +1,42 @@
+<div id="content">
+    <div class="notify" ng-show="startfromflowdisplay">
+        <p>Om een advies op maat te kunnen geven moeten we meer over je persoonlijkheid weten. Klik op onderstaande knop om de persoonlijkheidstest te beginnen.</p>
+        <p>De test bestaat uit 40 vragen en is eenmalig. Heb je nu geen zin of tijd om deze nu in te vullen, doe de test dan op een ander moment. Maar pas als je de test hebt gedaan krijg je een beter beeld van je problemen en een startpunt voor een ontwikkelingstraject.</p>        
+        <form ng-submit="startPersonality('new')" class="buttoncent">
+            <input class="btn btn-blue" type="submit" value="Begin de persoonlijkheidstest">
+        </form>
+    </div>
+
+    <div class="notify" ng-show="existingdisplay">
+        <p>Je hebt de persoonlijkheidstest nog niet afgerond.</p>
+        <form ng-submit="startPersonality('existing')" class="buttoncent">
+            <input class="btn btn-red" type="submit" value="Maak de pesroonlijkheidstest af">
+        </form>
+    </div>
+
+    <div class="notify" ng-show="againdisplay">
+        <p>Je hebt de persoonlijkheidstest al afgerond.
+            <form ng-submit="getResults()" class="buttoncent">
+                <input class="btn btn-blue" type="submit" value="Resultaten test">
+            </form>
+    </div>
+
+    <div ng-show="questionsdisplay" class="questions">
+        <div ng-repeat="question in questions" ng-show="question.display" class="question">
+            <div class="progressbar">
+                <button ng-click="prevQuestion($index)" ng-if="$index > 0" class="btnsmall btn-green btnprev">Terug</button>
+                <button ng-click="nextQuestion($index)" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext">Volgende</button>
+            </div>
+            <div class="progress">vraag {{ $index + 1 }} van {{ questionsLength }}</div>
+            <div class="detail">
+                <p>{{ question.q }}</p>
+            </div>
+            <div class="responseops">
+                 <span ng-repeat="n in (question.pos ? posvalues : negvalues)">
+                     <input type="radio" ng-model="personality_answer" value="{{ n.val }}" ng-change="changedRP(personality_answer,{{ $parent.question.gebied }},{{ $parent.$index }},{{ $parent.question.mixed }})" name="{{ $parent.question.gebied }}-{{ $parent.$index }}" id="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}"/>
+                     <label for="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}">{{ n.label[0] }}</label>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

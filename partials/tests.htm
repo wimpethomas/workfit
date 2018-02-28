@@ -1,0 +1,77 @@
+<div id="content">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+        <div class="progressbar">
+            <button ng-click="prevQuestion($index)" ng-if="$index > 0" class="btnsmall btn-green btnprev">Terug</button>
+            <button ng-click="nextQuestion($index)" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext">Volgende</button>
+        </div>
+        <div class="progress">vraag {{ $index + 1 }} van {{ questionsLength }}</div>
+        <div class="detail">
+            <p>{{ question.q }}</p>
+        </div>
+        <div class="responseops">
+             <span ng-repeat="n in (question.pos ? posvalues : negvalues)">
+                     <input type="radio" ng-model="test_answer" value="{{ n.val }}" ng-change="changed(test_answer,{{ $parent.$index }})" name="{{ $parent.$index }}" id="{{ $parent.$index }}-{{ n.val }}"/>
+                     <label for="{{ $parent.$index }}-{{ n.val }}">{{ n.label[question.ro] }}</label>
+                </span>
+        </div>
+    </div>
+
+    <div ng-show="uitvaldisplay" class="notify">
+        <div class="detail">
+            <p>Vanuit de vorige vragen blijkt dat je onvoldoende scoort op het gebied {{ gebied }}. We hebben een aantal aanvullende vragen klaar staan om hier beter zicht op te krijgen.</p>
+        </div>
+        <form ng-submit="getNext()" class="buttoncent">
+            <input type="submit" value="Ga verder" class="btn btn-red">
+        </form>
+    </div>
+
+    <div ng-show="notestsdisplay" class="notify">
+        <div class="detail">
+            <p>Vanuit de nulmeting of wekelijkse check zijn er geen risicogebieden geconstateerd voor wat betreft gezondheid en welzijn op het werk en zodoende geen nadere vragen noodzakelijk.</p>
+            <p>Maar je bent vrij om deze vragen per risicogebied alsnog te doorlopen. Kies een gebied voor het maken van een ontwikkelingstest.</p>
+        </div>
+        <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+            <input type="submit" value="{{ value }}" class="btn btn-red">
+            <br>
+        </form>
+    </div>
+
+    <div ng-show="testdonedisplay" class="notify">
+        <div class="detail">
+            <p>Je hebt zojuist een test afgerond op het gebied {{ gebied }}. Weet je zeker dat je nog een test voor een ander risicogebied wilt doen? Zo ja, kies een van onderstaande tests.'</p>
+        </div>
+        <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+            <input type="submit" value="{{ value }}" class="btn btn-red">
+            <br>
+        </form>
+    </div>
+
+    <div ng-show="incoachingdisplay" class="notify">
+        <div class="detail">
+            <p>Je hebt onvoldoende gescoord op het gebied {{ gebied }}. Als je daarvoor nog geen ontwikkelingstraject hebt aangemaakt, raden we je aan dit te doen. Heb je er wel een aangemaakt, raden we je aan deze eerst af te maken.</p>
+            <form ng-submit="getAdvice()" class="buttoncent">
+                <input type="submit" value="Advies {{ gebied }}" class="btn btn-blue">
+                <br>
+            </form>
+            <p>Je kunt ook een losse test doen op een van de volgende gebieden.</p>
+            <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+                <input type="submit" value="{{ value }}" class="btn btn-red">
+                <br>
+            </form>
+        </div>
+    </div>
+
+    <div ng-show="unfinisheddisplay" class="notify">
+        <div class="detail">
+            <p>{{ text }}</p>
+        </div>
+        <div class="buttoncent">
+            <form ng-submit="getProfile()" class="buttoninline">
+                <input type="submit" value="Sla over" class="btn btn-blue spacer">
+            </form>
+            <form ng-submit="finishTest()" class="buttoninline">
+                <input type="submit" value="Maak de test" class="btn btn-red spacer">
+            </form>
+        </div>
+    </div>
+</div>

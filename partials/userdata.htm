@@ -1,0 +1,60 @@
+<div id="content">
+     <h3>{{ user }}</h3>
+     <h4>Data wekelijkse uitvraag</h4>
+    <table>
+        <thead>
+            <tr>
+                <td>Week</td>
+                <td>Basisvraag stress</td>
+                <td>Taakeisen vraag</td>
+                <td>Taakeisen antw.</td>
+                <td>Sociale steun vraag</td>
+                <td>Sociale steun antw.</td>
+                <td>Regelmogelijkh. vraag</td>
+                <td>Regelmogelijkh. antw.</td>
+                <td>Betrokkenheid vraag</td>
+                <td>Betrokkenheid antw.</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="weeknr in userData">
+                <td>{{ weeknr.week }}</td>
+                <td>{{ weeknr.stress_basis }}</td>
+                <td>{{ weeknr.taakeisen.question_nm }}</td>
+                <td>{{ weeknr.taakeisen.value }}</td>
+                <td>{{ weeknr.sociale_steun.question_nm }}</td>
+                <td>{{ weeknr.sociale_steun.value }}</td>
+                <td>{{ weeknr.regelmogelijkheden.question_nm }}</td>
+                <td>{{ weeknr.regelmogelijkheden.value }}</td>
+                <td>{{ weeknr.betrokkenheid.question_nm }}</td>
+                <td>{{ weeknr.betrokkenheid.value }}</td>
+            </tr>
+        </tbody>
+    </table>
+     <h4>Data testvragen</h4>
+    <table>
+        <thead>
+            <tr>
+                <td>Week</td>
+                <td>Gebied</td>
+                <td>Vraag 1</td>
+                <td>Vraag 2</td>
+                <td>Vraag 3</td>
+                <td>Vraag 4</td>
+                <td>Vraag 5</td>
+                <td>Vraag 6</td>
+                <td>Vraag 7</td>
+                <td>Vraag 8</td>
+                <td>Vraag 9</td>
+                <td>Vraag 10</td>
+            </tr>
+        </thead>
+        <tbody ng-repeat="gebied in ['taakeisen','sociale_steun','regelmogelijkheden','betrokkenheid']">
+            <tr ng-repeat="(key,val) in testData" ng-show="{{ val[gebied] }}">
+                <td>{{ val.week }}</td>
+                <td>{{ $parent.gebied }}</td>
+                <td ng-repeat="answer in $parent.val[gebied]">{{ answer }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

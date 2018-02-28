@@ -1,0 +1,63 @@
+<div id="content">
+    <div class="tabcontainer">
+        <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab':isActiveTab(tab)}">{{ tab }}</div>
+    </div>
+    <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result">
+        <!-- Archief -->
+        <div class="detail">
+            <p>De resultaten uit je laatst gemaakte test voor het gebied <b>{{ value.name }}</b> zijn dat:</p>
+        </div>
+        <ul class="box">
+            <li ng-repeat="niveau in value.results.niveaus" class="box">{{ niveau.value }}</li>
+        </ul>
+        <div>
+            <p>Wil je meer inzicht?</p>
+        </div>
+        <form ng-submit="getAdvice(key, value.resultnr)" class="buttoncent">
+            <input type="submit" value="Ga verder" class="btn btn-blue">
+        </form>
+        <div ng-if="value.amountofresults - value.amountofresultsfor.pending > 1">
+            <p>Wil je oudere testresultaten zien?</p>
+            <form ng-submit="toGebiedResults(key)" class="buttoncent">
+                <input type="submit" value="Archief" class="btn btn-green">
+            </form>
+        </div>
+        <!-- End Archief -->
+    </div>
+
+    <!-- Archief per Gebied -->
+    <div ng-if="gebiedviewdisplay" class="result">
+        <p>Dit zijn al je afgeronde testen op het gebied {{ gebiedsnaam }}:</p>
+        <form ng-submit="toResult(gebied, metadata.resultnr)" ng-repeat="metadata in metadatas" class="buttoncent" ng-if="metadata.status !== 'pending'">
+            <input type="submit" value="Test van {{ metadata.datum_start }}" class="btn btn-red">
+            <br>
+        </form>
+    </div>
+    <!-- End Archief per Gebied-->
+
+    <!-- View display of result -->
+    <div ng-show="viewresultdisplay" class="result">
+        <p>De resultaten uit de test voor het gebied <b>{{ gebiedsnaam }}</b> zijn dat:
+            <ul class="box">
+                <li ng-repeat="niveau in niveaus[gebied]" class="box">{{ niveau.value }}</li>
+            </ul>
+            <div class="buttoncent">
+                <form ng-submit="toGebiedResults(gebied)" class="buttoninline">
+                    <input type="submit" value="Terug" class="btn btn-green spacer">
+                </form>
+                <form ng-submit="getAdvice(gebied, resultnr, niveaus)" class="buttoninline">
+                    <input type="submit" value="Ga verder" class="btn btn-blue spacer">
+                </form>
+            </div>
+    </div>
+    <!-- End View display of result -->
+
+    <div ng-show="noresultdisplay" class="notify">
+        <div class="detail">
+            <p>Je hebt nog geen gebiedstest gedaan; er zijn dus nog geen testresultaten.</p>
+        </div>
+        <form ng-submit="getTests()" class="buttoncent">
+            <input type="submit" value="Maak een test" class="btn btn-blue">
+        </form>
+    </div>
+</div>

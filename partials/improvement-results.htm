@@ -1,0 +1,85 @@
+<div id="content">
+    <div class="tabcontainer">
+        <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab':isActiveTab(tab)}">{{ tab }}</div>
+    </div>
+    <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result">
+        <!-- Archief -->
+        <div class="detail">
+            <p>Dit is je laatst ingevulde oplossing op het gebied {{ value.name }}:</p>
+            <li class="box">{{ value.results.solution }}</li>
+            <p>En dit het bijbehorende stappenplan:</p>
+            <ul class="box">
+                <li ng-repeat="step in value.results.roadmap" class="box">Stap {{ $index + 1 }}: {{ step.step }}
+                    <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: {{ step.feedback }}</span>
+                </li>
+            </ul>
+            <div class="buttoncent">
+                <form ng-submit="toGebiedResults(key)" class="buttoninline" ng-if="value.amountofresults > 1">
+                    <input type="submit" value="Archief" class="btn btn-green spacer">
+                </form>
+                <form ng-submit="toResult(key, undefined, 'edit', 'home')" class="buttoninline">
+                    <input type="submit" value="Pas aan" class="btn btn-blue spacer">
+                </form>
+            </div>
+        </div>
+        <!-- End Archief -->
+    </div>
+
+    <!-- Archief per Gebied -->
+    <div ng-if="gebiedviewdisplay" class="result">
+        <p>Dit zijn al je ontwikkelingstrajecten op het gebied {{ gebiedsnaam }}:</p>
+        <form ng-submit="toResult(gebied, metadata.resultnr)" ng-repeat="metadata in metadatas" class="buttoncent">
+            <input type="submit" value="Traject van {{ metadata.datum_start }}" class="btn btn-red">
+            <br>
+        </form>
+    </div>
+    <!-- End Archief per Gebied-->
+
+    <!-- View display of result -->
+    <div ng-show="viewresultdisplay" class="result">
+        <p>Dit is je ingevulde oplossing op het gebied {{ gebiedsnaam }}:
+            <li class="box">{{ solution }}</li>
+            <p>En dit het bijbehorende stappenplan:</p>
+            <ul class="box">
+                <li ng-repeat="step in roadmap" class="box">Stap {{ $index + 1 }}: {{ step.step }}
+                    <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: {{ step.feedback }}</span>
+                </li>
+            </ul>
+            <div class="buttoncent">
+                <form ng-submit="toGebiedResults(gebied)" class="buttoninline">
+                    <input type="submit" value="Terug" class="btn btn-green spacer">
+                </form>
+                <form ng-submit="toResult(gebied, undefined, 'edit', 'detail')" class="buttoninline">
+                    <input type="submit" value="Pas aan" class="btn btn-blue spacer">
+                </form>
+            </div>
+    </div>
+    <!-- End View display of result -->
+
+    <!-- Edit display of result -->
+    <div ng-show="editresultdisplay" class="result">
+        <form ng-submit="editResult(gebied, roadmap)" class="buttoncent">
+            <p>Oplossing op het gebied {{ gebiedsnaam }}:</p>
+            <textarea rows="4" ng-model="editsolution" ng-init="editsolution = solution" class="btninput btn100"></textarea>
+            <p>En het bijbehorende stappenplan:</p>
+            <div ng-repeat="step in roadmap">Stap {{ $index + 1 }} (veld 1) en evt. feedback (veld 2):
+                <input type="text" ng-model="editroadmap[$index].step" ng-init="editroadmap = roadmap" class="btninput btn100">
+                <input type="text" ng-model="editroadmap[$index].feedback" ng-init="editroadmap = roadmap" class="btninput btn100">
+            </div>
+            <input type="submit" value="Pas aan" class="btn btn-blue" style="position: relative; top: 70px;">
+            <div style="height: 40px">&nbsp;</div>
+        </form>
+        <button ng-click="removeStep()" class="btn btn-green" style="position: relative; top: -120px; float: left;">Verwijder stap</button>
+        <button ng-click="addStep()" class="btn btn-green" style="position: relative; top: -120px; float: right;">Voeg stap toe</button>
+    </div>
+    <!-- End Edit display of result -->
+
+    <div ng-show="noadvicedisplay" class="notify">
+        <div class="detail">
+            <p>Er is geen ontwikkelingstraject voor je actief.</p>
+        </div>
+        <form ng-submit="getProfile()" class="buttoncent">
+            <input type="submit" value="Profiel" class="btn btn-blue">
+        </form>
+    </div>
+</div>

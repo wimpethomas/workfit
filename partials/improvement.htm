@@ -1,0 +1,137 @@
+<div id="content">
+    <!-- New solution -->
+    <div ng-show="solutioneditdisplay" class="notify">
+        <p>{{ solutionsentence }}</p>
+        <!-- Example -->
+        <div>
+            <p>
+                <button class="btn btn-blue" ng-click="showExample(true)" ng-if="!exampledisplay">Toon voorbeeld</button>
+                <button class="btn btn-blue" ng-click="showExample(false)" ng-if="exampledisplay">Verberg voorbeeld</button>
+            </p>
+            <div ng-show="exampledisplay" class="examplecont">
+                <div class="exampletext">
+                    <p>Oplossing: {{ example.solution }}</p>Stappenplan:
+                    <ol>
+                        <li ng-repeat="step in example.roadmap">{{ step }}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- End Example -->
+        <form ng-submit="submitSolution()" class="buttoncent">
+            <textarea rows="4" ng-model="solution" placeholder="Beschrijf hier je oplossing" class="btninput btn100" required></textarea>
+            <input type="submit" value="Ga naar stappenplan" class="btn btn-red">
+        </form>
+    </div>
+    <!-- End New solution -->
+
+    <!-- New roadmap -->
+    <div ng-show="roadmapdisplay" class="notify">
+        <p>Maak een stappenplan om bij de oplossing te komen, maak de laatste stap uit je stappenplan er eentje die er op gericht is om de verandering die je voor ogen heeft blijvend te laten zijn. Wij raden je aan om het gemaakte stappenplan ook te bespreken met een collega die je vertrouwt.</p>
+        <!-- Example -->
+        <div>
+            <p>
+                <button class="btn btn-blue" ng-click="showExample(true)" ng-if="!exampledisplay">Toon voorbeeld</button>
+                <button class="btn btn-blue" ng-click="showExample(false)" ng-if="exampledisplay">Verberg voorbeeld</button>
+            </p>
+            <div ng-show="exampledisplay" class="examplecont">
+                <div class="exampletext">
+                    <p>Oplossing: {{ example.solution }}</p>Stappenplan:
+                    <ol>
+                        <li ng-repeat="step in example.roadmap">{{ step }}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- End Example -->
+        <input ng-repeat="step in roadmap track by $index" type="text" ng-model="roadmap[$index].step" placeholder="Stap {{ $index+1 }}" class="btninput btn75">
+        <button ng-click="removeStep()" ng-show="showbutton" class="btn btn-blue" style="float: right;">-</button>
+        <button ng-click="addStep()" class="btn btn-red" style="float: right;">+</button>
+        <div class="buttoncent">
+            <button ng-click="submitRoadmap()" class="btn btn-red">Verzend stappenplan</button>
+        </div>
+        <!--<pre>{{ roadmap | json }}</pre>-->
+    </div>
+    <!-- End New roadmap -->
+
+    <!-- Reminder step done -->
+    <div ng-show="reminderdonedisplay" class="notify">
+        <p>Heeft u stap {{ stepDone }} uitgevoerd?
+            <br>(Stap {{ stepDone }}: {{ stepTxt }})</p>
+        <div class="buttoncent">
+            <button ng-click="reminderDone(stepDone, 'n')" class="btn btn-red btnminwidth spacer">Nee</button>
+            <button ng-click="reminderDone(stepDone+1, 'y')" class="btn btn-blue btnminwidth spacer">Ja</button>
+        </div>
+    </div>
+    <!-- End Reminder done -->
+
+    <!-- Reminder step feedback -->
+    <div ng-show="givefeedbackdisplay" class="notify">
+        <p>Sla - indien je dat wilt - voor de uitgevoerde stap notities op. Wat waren bijzonderheden, wat ging goed, wat minder, enzovoorts.</p>
+        <div class="buttoncent">
+            <form ng-submit="submitFeedback('skip')" class="buttoninline">
+                <input type="submit" value="Sla over" class="btn btn-blue">
+            </form>
+            <form ng-submit="submitFeedback('submit', stepDone)" class="buttoninline">
+                <textarea rows="4" ng-model="feedback" placeholder="Notitieveld" class="btninput btn100"></textarea>
+                <input type="submit" value="Verzend" class="btn btn-red">
+            </form>
+        </div>
+    </div>
+    <!-- End Reminder finish traject -->
+
+    <!-- Reminder step set -->
+    <div ng-show="setreminderdisplay" class="notify">
+        <p>Geef aan hoeveel dagen je {{ extra }} nodig hebt voor het uitvoeren van stap {{ stepNext }}
+            <br><span ng-if="stepNext !== 1">(Stap {{ stepNext }}: {{ stepNTxt }})</span>
+        </p>
+        <form ng-submit="setReminder(stepNext, type)" class="buttoncent">
+            <input type="number" ng-model="notification" placeholder="Aantal dagen" class="btninput rspace" width="60" required>
+            <input type="submit" value="Verzend" class="btn btn-red">
+        </form>
+    </div>
+    <!-- End Reminder set -->
+
+    <!-- Reminder finish traject -->
+    <div ng-show="roadmapdonedisplay" class="notify">
+        <p>Gefeliciteerd! Je hebt het stappenplan afgerond.
+            <br>Je kunt deze - en andere stappenplannen - altijd terugkijken via het menu item 'Ontwikkelingstrajecten'.</p>
+        <form ng-submit="getTrajecten()" class="buttoncent">
+            <input type="submit" value="Ontwikkelingstrajecten Archief" class="btn btn-blue">
+        </form>
+    </div>
+    <!-- End Reminder finish traject -->
+
+    <!-- Rest: no unfinshed trajecten available -->
+    <div ng-show="noadvicedisplay" class="notify">
+        <div class="detail">
+            <p>Er is geen ontwikkelingstraject voor je actief. Kennelijk gaat het goed met je!</p>
+        </div>
+        <form ng-submit="getTrajecten()" class="buttoncent">
+            <input type="submit" value="Ontwikkelingstrajecten Archief" class="btn btn-blue">
+        </form>
+    </div>
+    <!-- End Rest: no unfinshed trajecten available -->
+
+    <!-- Rest: roadmap sent -->
+    <div ng-show="roadmapsentdisplay" class="notify">
+        <div class="detail">
+            <p>Mooi! Je krijgt na {{ notification }} dagen een notificatie voor je vervolgstap</p>
+        </div>
+        <form ng-submit="getTrajecten()" class="buttoncent">
+            <input type="submit" value="Ontwikkelingstrajecten Archief" class="btn btn-blue">
+        </form>
+    </div>
+    <!-- Eńd Rest: roadmap sent -->
+
+    <!-- Rest: roadmap saved for null advice -->
+    <div ng-show="roadmapnulldisplay" class="notify">
+        <div class="detail">
+            <p>Goed! We hebben je oplossing en stappenplan opgeslagen zodat je deze later weer kunt opvragen.</p>
+        </div>
+        <form ng-submit="getTrajecten()" class="buttoncent">
+            <input type="submit" value="Ontwikkelingstrajecten Archief" class="btn btn-blue">
+        </form>
+    </div>
+    <!-- End Rest: roadmap saved for null advice -->
+</div>
