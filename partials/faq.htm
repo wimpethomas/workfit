@@ -1,8 +1,8 @@
 <div id="content">
-    <div ng-repeat="faq in faqs" class="result2 buttoncent">
-        <span ng-click="show = !show">{{ faq.q }}</span>
-        <img src="assets/arrow-down.png" width="20" ng-click="show = !show" ng-show="!show" style="margin-left: 20px">
-        <img src="assets/arrow_up.png" width="20" ng-click="show = !show" ng-show="show" style="margin-left: 20px">
-        <li class="box" ng-show="show">{{ faq.a }}</li>
-    </div>
+  <div ng-repeat="faq in faqs" class="result2 buttoncent">
+    <span ng-click="show = !show" data-page="faq" data-type="textlink">{{ faq.q }}</span>
+    <img src="assets/arrow-down.png" width="20" ng-click="show = !show" ng-show="!show" style="margin-left: 20px" data-page="faq" data-type="imagelink">
+    <img src="assets/arrow_up.png" width="20" ng-click="show = !show" ng-show="show" style="margin-left: 20px" data-page="faq" data-type="imagelink">
+    <li class="box" ng-show="show">{{ faq.a }}</li>
+  </div>
 </div>

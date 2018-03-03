@@ -1,66 +1,81 @@
 <html>
 
-    <head>
-        <meta name="viewport" content="width=device-width, user-scalable=no" />
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-touch.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase-database.js"></script>
-        <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
+  <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){
+      w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-5J4R9F5');</script>
+    <!-- End Google Tag Manager -->
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-touch.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase-database.js"></script>
+    <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
 
-        <!--<script src="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth__nl.js"></script>-->
+    <!--<script src="/node_modules/angular-inview/angular-inview.js"></script>-->
+    <!--<script src="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth__nl.js"></script>-->
 
-        <script src="assets/authui.js"></script>
-        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-        <script src="https://www.youtube.com/iframe_api"></script>
-        <script src="workfit.js"></script>
-        <script src="service-worker.js"></script>
-        <script src="services/allownotifications.js"></script>
-        <script src="services/responseoptions.js"></script>
-        <script src="services/nulwekelijksresults.js"></script>
-        <script src="services/gebieden.js"></script>
-        <script src="services/solutionexamples.js"></script>
-        <script src="services/variousfunctions.js"></script>
-        <script src="services/angular-youtube-embed.js"></script>
-        <script src="controllers/admin.js"></script>
-        <script src="controllers/nulmeting.js"></script>
-        <script src="controllers/profile.js"></script>
-        <script src="controllers/weekly.js"></script>
-        <script src="controllers/tests.js"></script>
-        <script src="controllers/results.js"></script>
-        <script src="controllers/personalitytest.js"></script>
-        <script src="controllers/personalityresults.js"></script>
-        <script src="controllers/advice.js"></script>
-        <script src="controllers/improvement.js"></script>
-        <script src="controllers/improvement-results.js"></script>
-        <script src="controllers/faq.js"></script>
-        <script src="controllers/userdata.js"></script>
-        <script src="controllers/userlist.js"></script>
-        <script src="controllers/0test.js"></script>
-        <link rel="stylesheet" media="all" href="assets/style.css" />
-        <link rel="stylesheet" media="all" href="assets/menu.css" />
-        <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth.css" />
-        <link rel="manifest" href="manifest.json">
-        <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
-        <meta name="msapplication-TileColor" content="#2F3BA2">
-    </head>
+    <script src="assets/authui.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="workfit.js"></script>
+    <script src="service-worker.js"></script>
+    <script src="services/allownotifications.js"></script>
+    <script src="services/responseoptions.js"></script>
+    <script src="services/nulwekelijksresults.js"></script>
+    <script src="services/gebieden.js"></script>
+    <script src="services/solutionexamples.js"></script>
+    <script src="services/variousfunctions.js"></script>
+    <script src="services/angular-inview.js"></script>
+    <script src="services/angular-youtube-embed.js"></script>
+    <script src="controllers/admin.js"></script>
+    <script src="controllers/nulmeting.js"></script>
+    <script src="controllers/profile.js"></script>
+    <script src="controllers/weekly.js"></script>
+    <script src="controllers/tests.js"></script>
+    <script src="controllers/results.js"></script>
+    <script src="controllers/personalitytest.js"></script>
+    <script src="controllers/personalityresults.js"></script>
+    <script src="controllers/advice.js"></script>
+    <script src="controllers/improvement.js"></script>
+    <script src="controllers/improvement-results.js"></script>
+    <script src="controllers/faq.js"></script>
+    <script src="controllers/userdata.js"></script>
+    <script src="controllers/userlist.js"></script>
+    <script src="controllers/0test.js"></script>
+    <link rel="stylesheet" media="all" href="assets/style.css" />
+    <link rel="stylesheet" media="all" href="assets/menu.css" />
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth.css" />
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#2F3BA2">
+  </head>
 
-    <body ng-app="workfit">
-        <div id="header">
-            <wf-menu></wf-menu>
-            <img src="assets/workfit-logo.jpeg">
-        </div>
-        <div id="firebaseui-auth-container"></div>
-        <div id="spinner" class="spinner">
-            <div class="rect1"></div>
-            <div class="rect2"></div>
-            <div class="rect3"></div>
-            <div class="rect4"></div>
-            <div class="rect5"></div>
-        </div>
-        <ng-view></ng-view>
-    </body>
+  <body ng-app="workfit">
+    <div id="header">
+      <wf-menu></wf-menu>
+      <img src="assets/workfit-logo.jpeg">
+    </div>
+    <div id="firebaseui-auth-container"></div>
+    <div id="spinner" class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
+    <ng-view></ng-view>
+    <script>
+      var landingspage = window.location.hash;
+      var analytics = {landingspage: landingspage, user: ''};
+    </script>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5J4R9F5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+  </body>
 
 </html>

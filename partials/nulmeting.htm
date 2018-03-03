@@ -1,67 +1,67 @@
 <div id="content">
-    <div class="notify" ng-show="welcomedisplay">
-        <p>Welkom bij de Workfit app, de app die ervoor zorgt dat je gezond en gelukkig bent en blijft op je werk.
-            <br>De app is anoniem, gegevens die je invult zijn alleen voor jezelf inzichtelijk.</p>
-        <div class="buttoncent">
-            <form ng-submit="getUitleg()" class="buttoninline">
-                <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit">
-            </form>
-            <form ng-submit="startNulmeting('new')" class="buttoninline">
-                <input class="btn btn-blue spacer" type="submit" value="Begin nulmeting">
-            </form>
-        </div>
+  <div class="notify" ng-show="welcomedisplay">
+    <p>Welkom bij de Workfit app, de app die ervoor zorgt dat je gezond en gelukkig bent en blijft op je werk.
+      <br>De app is anoniem, gegevens die je invult zijn alleen voor jezelf inzichtelijk.</p>
+    <div class="buttoncent">
+      <form ng-submit="getUitleg()" class="buttoninline">
+        <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit" data-page="nulmeting" data-sub="welkom" data-type="button">
+      </form>
+      <form ng-submit="startNulmeting('new')" class="buttoninline">
+        <input class="btn btn-blue spacer" type="submit" value="Begin nulmeting" data-page="nulmeting" data-sub="welcome" data-type="button">
+      </form>
     </div>
+  </div>
 
-    <div class="notify" ng-show="existingdisplay">
-        <p>Je hebt de nulmeting nog niet afgerond.</p>
-        <form ng-submit="startNulmeting('existing')" class="buttoncent">
-            <input class="btn btn-red" type="submit" value="Maak nulmeting af">
-        </form>
-    </div>
+  <div class="notify" ng-show="existingdisplay">
+    <p>Je hebt de nulmeting nog niet afgerond.</p>
+    <form ng-submit="startNulmeting('existing')" class="buttoncent">
+      <input class="btn btn-red" type="submit" value="Maak nulmeting af" data-page="nulmeting" data-sub="finish" data-type="button">
+    </form>
+  </div>
 
-    <div class="notify" ng-show="resultdisplay">
-        <p>Mooi! Je scoort voldoende op alle gezondheidsgebieden. Klik onderstaand om de resultaten te zien.</p>
-        <form ng-submit="skipNulmeting()" class="buttoncent">
-            <input class="btn btn-blue" type="submit" value="Resultaten nulmeting">
-        </form>
-    </div>
+  <div class="notify" ng-show="resultdisplay">
+    <p>Mooi! Je scoort voldoende op alle gezondheidsgebieden. Klik onderstaand om de resultaten te zien.</p>
+    <form ng-submit="skipNulmeting()" class="buttoncent">
+      <input class="btn btn-blue" type="submit" value="Resultaten nulmeting" data-page="nulmeting" data-sub="nouitval" data-type="button">
+    </form>
+  </div>
 
-    <div class="notify" ng-show="againdisplay">
-        <p>Ga verder met een van onderstaande onderdelen.
-            <!-- Wil je de nulmeting nogmaals doorlopen?</p>
-        <p>(Resultaten worden overschreven.) --></p>
-        <div class="buttoncent">
-            <form ng-submit="getUitleg()" class="buttoninline">
-                <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit">
-            </form>
-            <form ng-submit="skipNulmeting()" class="buttoninline">
-                <input class="btn btn-blue spacer" type="submit" value="Profiel">
-            </form>
-            <form ng-submit="getVerbetertraject()" class="buttoninline">
-                <input class="btn btn-blue spacer" type="submit" value="Ontwikkelingstraject">
-            </form>            
-        </div>
-        <!--
-        <form ng-submit="startNulmeting('new')">
-            <input class="btn btn-red" type="submit" value="Doe de nulmeting opnieuw">
-        </form>
-        -->
+  <div class="notify" ng-show="againdisplay">
+    <p>Ga verder met een van onderstaande onderdelen.
+      <!-- Wil je de nulmeting nogmaals doorlopen?</p>
+<p>(Resultaten worden overschreven.) --></p>
+    <div class="buttoncent">
+      <form ng-submit="getUitleg()" class="buttoninline">
+        <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit" data-page="nulmeting" data-sub="afgerond" data-type="button">
+      </form>
+      <form ng-submit="skipNulmeting()" class="buttoninline">
+        <input class="btn btn-blue spacer" type="submit" value="Profiel" data-page="nulmeting" data-sub="afgerond" data-type="button">
+      </form>
+      <form ng-submit="getVerbetertraject()" class="buttoninline">
+        <input class="btn btn-blue spacer" type="submit" value="Ontwikkelingstraject" data-page="nulmeting" data-sub="afgerond" data-type="button">
+      </form>
     </div>
+    <!--
+<form ng-submit="startNulmeting('new')">
+<input class="btn btn-red" type="submit" value="Doe de nulmeting opnieuw">
+</form>
+-->
+  </div>
 
-    <div ng-show="questionsdisplay" class="questions">
-        <div ng-repeat="question in questions" ng-show="question.display" class="question">
-            <div class="progressbar">
-                <button ng-click="prevQuestion($index)" ng-if="$index > 0" class="btnsmall btn-green btnprev">Terug</button>
-                <button ng-click="nextQuestion($index)" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext">Volgende</button>
-            </div>
-            <div class="progress">vraag {{ $index + 1 }} van {{ questionsLength }}</div>
-            <div class="detail"><p>{{ question.q }}</p></div>
-            <div class="responseops">
-                 <span ng-repeat="n in (question.pos ? posvalues : negvalues)">
-                     <input type="radio" ng-model="nulgebied_answer" value="{{ n.val }}" ng-change="changedRN(nulgebied_answer,'{{ $parent.question.gebied }}',{{ $parent.$index }})" name="{{ $parent.question.gebied }}-{{ $parent.$index }}" id="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}"/>
-                     <label for="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}">{{ n.label[question.ro] }}</label>
-                </span>
-            </div>
-        </div>
+  <div ng-show="questionsdisplay" class="questions">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+      <div class="progressbar">
+        <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="nulmeting" data-sub="test" data-type="button-small">Terug</button>
+        <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="nulmeting" data-sub="test" data-type="button-small">Volgende</button>
+      </div>
+      <div class="progress">vraag {{ $index + 1 }} van {{ questionsLength }}</div>
+      <div class="detail"><p>{{ question.q }}</p></div>
+      <div class="responseops">
+        <span ng-repeat="n in (question.pos ? posvalues : negvalues)">
+          <input type="radio" ng-model="nulgebied_answer" value="{{ n.val }}" ng-change="changedRN(nulgebied_answer,'{{ $parent.question.gebied }}',{{ $parent.$index }})" name="{{ $parent.question.gebied }}-{{ $parent.$index }}" id="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}" class="radio"/>
+          <label for="{{ $parent.question.gebied }}-{{ $parent.$index }}-{{ n.val }}" data-page="nulmeting" data-sub="test" data-type="option">{{ n.label[question.ro] }}</label>
+        </span>
+      </div>
     </div>
+  </div>
 </div>

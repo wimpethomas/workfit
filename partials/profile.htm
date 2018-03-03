@@ -1,14 +1,14 @@
 <div id="content-2">
-    <img src="https://cdn3.iconfinder.com/data/icons/faticons/32/arrow-left-01-512.png" width="30" ng-click="showPrev(gid)" class="np prev">
-    <img src="https://cdn3.iconfinder.com/data/icons/faticons/32/arrow-right-01-512.png" width="30" ng-click="showNext(gid)" class="np next">
+  <img src="https://cdn3.iconfinder.com/data/icons/faticons/32/arrow-left-01-512.png" width="30" ng-click="showPrev(gid)" class="np prev" data-page="profiel" data-type="button-small">
+  <img src="https://cdn3.iconfinder.com/data/icons/faticons/32/arrow-right-01-512.png" width="30" ng-click="showNext(gid)" class="np next" data-page="profiel" data-type="button-small">
 
-    <div ng-repeat="(key, value) in results" class="chartcont" ng-show="value.display" ng-swipe-left="showNext(gid)" ng-swipe-right="showPrev(gid)">
-        <div class="chart-title">{{ value.name }}</div>
-        <div id="chart-{{ key }}" class="chart"></div>
-        <p class="notify">Je hebt in de vragen over <b>{{ value.name }}</b> {{ value.score }} punten gehaald uit maximaal {{ value.maxscore }}, oftewel {{ value.percdisplay }}% positief.
-             <span ng-if="value.percentage > 0.7">Dit is boven onze gehanteerde drempel van 40% als risico-indicatie. Prima!</span>
-             <span ng-if="value.percentage > 0.4 && value.percentage < 0.7">Dit is boven onze gehanteerde drempel van 40% als risico-indicatie. Voldoende dus, maar het kan beter.</span>
-             <span ng-if="value.percentage < 0.4">Dit is onder onze gehanteerde drempel van 40% als risico-indicatie. Dit punt is voor verbetering vatbaar.</span>
-        </p>
-    </div>
+  <div ng-repeat="(key, value) in results" class="chartcont" ng-show="value.display" ng-swipe-left="showNext(gid)" ng-swipe-right="showPrev(gid)">
+    <div class="chart-title">{{ value.name }}</div>
+    <div id="chart-{{ key }}" class="chart"></div>
+    <p class="notify">Je hebt in de vragen over <b>{{ value.name }}</b> {{ value.score }} punten gehaald uit maximaal {{ value.maxscore }}, oftewel {{ value.percdisplay }}% positief.
+      <span ng-if="value.percentage > 0.7">Dit is boven onze gehanteerde drempel van 40% als risico-indicatie. Prima!</span>
+      <span ng-if="value.percentage > 0.4 && value.percentage < 0.7">Dit is boven onze gehanteerde drempel van 40% als risico-indicatie. Voldoende dus, maar het kan beter.</span>
+      <span ng-if="value.percentage < 0.4">Dit is onder onze gehanteerde drempel van 40% als risico-indicatie. Dit punt is voor verbetering vatbaar.</span>
+    </p>
+  </div>
 </div>

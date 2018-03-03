@@ -2,22 +2,32 @@
     <div ng-repeat="tab in tabs" class="tab activetab">{{ tab }}</div>
     <div class="result">
         <div id="movie" ng-show="movieDisplay">
+        <!-- From gebiedstest -->
+            <div ng-show="fromtestsDisplay" class="examplecont" style="margin-top:-20px;">
+                <div class="exampletext">
+                    <p>Je kunt op de volgende pagina een ontwikkelingstraject aanmaken om te verbeteren op het gebied {{ gebied }}. Om je te helpen een beter traject op te stellen, bekijk eerst onderstaand filmpje en vervolgens je 'diagnose op maat'.</p>
+                </div>
+            </div>
+        <!-- End Example -->
             <youtube-video video-id="ytId" player-vars="playerVars" player-width="'100%'" player-height="'400px'"></youtube-video>
             <br>
             <br>
             <form ng-submit="skipMovie()" ng-if="urlgebied !== 'uitleg'" class="buttoncent">
-                <input type="submit" value="Sla filmpje over" class="btn btn-green">
+                <input type="submit" value="Sla filmpje over" class="btn btn-green" data-page="advies" data-sub="filmpje" data-type="button-bottom">
             </form>
             <div class="buttoncent" ng-if="urlgebied == 'uitleg'">
                 <form ng-submit="getFaq()" class="buttoninline">
-                    <input type="submit" value="FAQ" class="btn btn-blue spacer">
+                    <input type="submit" value="FAQ" class="btn btn-blue spacer" data-page="advies" data-sub="filmpje" data-type="button-bottom">
                 </form>
                 <form ng-submit="getBack()" class="buttoninline">
-                    <input type="submit" value="Terug naar nulmeting" class="btn btn-green spacer">
+                    <input type="submit" value="Terug naar nulmeting" class="btn btn-green spacer" data-page="advies" data-sub="filmpje" data-type="button-bottom">
                 </form>
             </div>
         </div>
         <div ng-show="coachingDisplay">
+            <form ng-submit="getSolution()" class="buttoncent">
+                <input type="submit" value="Start ontwikkelingtraject" class="btn btn-red" ng-if="!buttoninview" data-page="advies" data-sub="advies" data-type="button-top">
+            </form>
             <div ng-show="persDisplay">
                 <p>Uit de persoonlijkheidstest komt het volgende naar voren:</p>
                 <ul class="box">
@@ -33,7 +43,7 @@
                 <li ng-repeat="r in bulletsR" class="box">{{ r }}</li>
             </ul>
             <form ng-submit="getSolution()" class="buttoncent">
-                <input type="submit" value="Start ontwikkelingtraject" class="btn btn-red">
+                <input type="submit" value="Start ontwikkelingtraject" class="btn btn-red" in-view="buttoninview = $inview" data-page="advies" data-sub="advies" data-type="button-bottom">
             </form>
         </div>
     </div>
