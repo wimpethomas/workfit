@@ -3,9 +3,9 @@
   <head>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){
-      w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
-      var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','GTM-5J4R9F5');</script>
+  w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+  var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5J4R9F5');</script>
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
@@ -18,8 +18,8 @@
 
     <!--<script src="/node_modules/angular-inview/angular-inview.js"></script>-->
     <!--<script src="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth__nl.js"></script>-->
-
     <script src="assets/authui.js"></script>
+
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="workfit.js"></script>
@@ -31,8 +31,10 @@
     <script src="services/solutionexamples.js"></script>
     <script src="services/variousfunctions.js"></script>
     <script src="services/angular-inview.js"></script>
+    <script src="services/angularjs-dropdown-multiselect.min.js"></script>
     <script src="services/angular-youtube-embed.js"></script>
     <script src="controllers/admin.js"></script>
+    <script src="controllers/adminusers.js"></script>
     <script src="controllers/nulmeting.js"></script>
     <script src="controllers/profile.js"></script>
     <script src="controllers/weekly.js"></script>
@@ -44,6 +46,10 @@
     <script src="controllers/improvement.js"></script>
     <script src="controllers/improvement-results.js"></script>
     <script src="controllers/faq.js"></script>
+    <script src="controllers/functioneringstest.js"></script>
+    <script src="controllers/functioneringsresults.js"></script>
+    <script src="controllers/functioneringsafspraken.js"></script>
+    <script src="controllers/functioneringsarchief.js"></script>
     <script src="controllers/userdata.js"></script>
     <script src="controllers/userlist.js"></script>
     <script src="controllers/0test.js"></script>
@@ -60,7 +66,7 @@
       <wf-menu></wf-menu>
       <img src="assets/workfit-logo.jpeg">
     </div>
-    <div id="firebaseui-auth-container"></div>
+    <wf-login></wf-login>
     <div id="spinner" class="spinner">
       <div class="rect1"></div>
       <div class="rect2"></div>
@@ -68,7 +74,9 @@
       <div class="rect4"></div>
       <div class="rect5"></div>
     </div>
-    <ng-view></ng-view>
+    <div id="wrapper">
+      <ng-view></ng-view>
+    </div>
     <script>
       var landingspage = window.location.hash;
       var analytics = {landingspage: landingspage, user: ''};

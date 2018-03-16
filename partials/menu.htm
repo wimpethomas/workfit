@@ -1,30 +1,34 @@
-<a class="wf-menu-button" id="wf-menu-button" ng-click="openMenu()" data-sub="open-menu" data-type="menu"></a>
+<a class="wf-menu-button" id="wf-menu-button" ng-click="openMenu()" data-page="menu" data-sub="open-menu" data-type="menu"></a>
 <div class="wf-menu-content" ng-class="{active: isShowingMenu}">
   <div class="wf-menu-close-wrapper" ng-class="{active: isShowingMenu}">
     <div class="wf-menu-header">{{ username }}
       <br>Testbedrijf</div>
     <div class="wf-menu-close">
-      <a ng-click="closeMenu()" data-sub="close-menu" data-type="menu"></a>
+      <a ng-click="closeMenu()" data-page="menu" data-sub="close-menu" data-type="menu"></a>
     </div>
   </div>
   <ul class="menu-list">
-    <li class="menu-item"><a href="#!nulmeting" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Nulmeting</a>
+    <li class="menu-item"><a href="#!nulmeting" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Nulmeting</a>
     </li>
-    <li class="menu-item"><a href="#!weekly" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Wekelijkse check</a>
+    <li class="menu-item"><a href="#!weekly" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Wekelijkse check</a>
     </li>
-    <li class="menu-item"><a href="#!tests" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Gebiedstesten</a>
+    <li class="menu-item"><a href="#!tests" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Gebiedstesten</a>
     </li>
-    <li class="menu-item"><a href="#!personalitytest" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Persoonlijkheidstest</a>
+    <li class="menu-item"><a href="#!personalitytest" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Persoonlijkheidstest</a>
     </li>
   </ul>
   <ul class="menu-list">
-    <li class="menu-item"><a href="#!profiel/nulmeting" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Resultaten Nulmeting</a>
+    <li class="menu-item"><a href="#!profiel/nulmeting" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Resultaten Nulmeting</a>
     </li>
-    <li class="menu-item"><a href="#!results" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Resultaten Gebieden</a>
+    <li class="menu-item"><a href="#!results" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Resultaten Gebieden</a>
     </li>
-    <li class="menu-item"><a href="#!personalityresults" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Resultaten Persoonlijkheid</a>
+    <li class="menu-item"><a href="#!personalityresults" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Resultaten Persoonlijkheid</a>
     </li>
-    <li class="menu-item"><a href="#!verbetertrajecten" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Ontwikkelingstrajecten</a>
+    <li class="menu-item"><a href="#!verbetertrajecten" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Ontwikkelingstrajecten</a>
+    </li>
+  </ul>
+  <ul class="menu-list">
+    <li class="menu-item"><a href="#!functioneringstest" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Functioneringsgesprek</a>
     </li>
   </ul>
   <!--
@@ -35,10 +39,10 @@
 </li>
 <li class="menu-item"><a href="#!admin" ng-click="closeMenu()">Beheer vragen</a>
 </li>-->
-    <li class="menu-item"><a href="#!faq" ng-click="closeMenu()" data-sub="menulink" data-type="menu">Uitleg WorkFit</a>
+    <li class="menu-item"><a href="#!faq" ng-click="closeMenu()" data-page="menu" data-sub="menulink" data-type="menu">Uitleg WorkFit</a>
     </li>
-    <li class="menu-item"><a href="#!/" ng-click="signOut()" data-sub="menulink" data-type="menu">Uitloggen</a>
+    <li class="menu-item"><a href="#!/" ng-click="signOut()" data-page="menu" data-sub="menulink" data-type="menu">Uitloggen</a>
     </li>
   </ul>
 </div>
-<div class="wf-backdrop" ng-class="{active: isShowingMenu}" ng-click="closeMenu()" data-sub="close-menu" data-type="menu"></div>
+<div class="wf-backdrop" ng-class="{active: isShowingMenu}" ng-click="closeMenu()" data-page="menu" data-sub="close-menu" data-type="menu"></div>

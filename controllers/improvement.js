@@ -4,6 +4,7 @@ angular.module('workfit')
 function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Store, Examples, Gebieden, Functions) {
   var storedGebied = Store.getResults().resultgebied // Set in /results.
   var storedTestnr = Store.getResults().testnr; // Set in /tests (if coming from 'losse' test: storedAdvNr = null)
+  var funcNr = $routeParams.fid; // If coming van functioneringstrajecten
   var nowString = Functions.setWfDate();
 
   var testlog = {
@@ -19,6 +20,7 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
 
   // Define type
   if (storedGebied !== undefined && storedTestnr !== undefined) getData('known', storedGebied, storedTestnr);
+  else if (funcNr !== undefined) getData('func', undefined, funcNr);
   else getData('unknown', undefined, undefined);
 
   function stepsPerRoadmap(roadmap) {
@@ -85,16 +87,16 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
         var resultsObj = {};
         switch (type) {
           case 'known': // New verbetertraject
+          case 'func': // In case of functionering
             var adviesStr = 'advies-' + adviesnr;
-            var results = responsesAdv == undefined || responsesAdv[gebied] == undefined ? undefined : responsesAdv[gebied][adviesStr];
+            if (type == 'func') gebied = 'functionering';
+            else var results = responsesAdv == undefined || responsesAdv[gebied] == undefined ? undefined : responsesAdv[gebied][adviesStr];
             var isNewAdvies = results == undefined ? true : false;
             if (!isNewAdvies) $location.path('/verbetertrajecten/' + gebied + '/' + adviesnr);
             else {
               resultsObj[gebied] = {
                 resultnr: adviesnr,
-                results: {
-                  newadv: true
-                },
+                results: {newadv: true},
                 resultstr: adviesStr
               };
             }
@@ -130,6 +132,8 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
     // Initial setup depending on type
     var gebied = Object.keys(resultsObj)[0];
     $scope.gebied = Gebieden.gebiedsnamen[gebied];
+    console.log(gebied);
+
     var advStr = resultsObj[gebied] == undefined ? undefined : resultsObj[gebied].resultstr;
     if (resultsObj[gebied] !== undefined) {
       var hasRoadmap = resultsObj[gebied].results.roadmap !== undefined ? true : false;
@@ -137,11 +141,14 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
       var steps = hasRoadmap ? roadmap.steps : [];
       var lastStepDone = roadmap.laststepdone;
       var roadmapDone = roadmap.roadmapdone;
-    } else $scope.noadvicedisplay = true;
+    }
+    else $scope.noadvicedisplay = true;
     switch (type) {
       case 'known':
+      case 'func':
         $scope.solutioneditdisplay = true; // Display: Submit new solution
         $scope.solutionsentence = Examples.getSolutionSentence(gebied);
+        if (type == 'func') $scope.hideexampledisplay = true; // Hide example buttons in case of functraject
         $scope.stepNext = 1;
         break;
       case 'unknown':

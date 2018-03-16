@@ -1,0 +1,12 @@
+<div id="content">
+  <div class="notify" ng-repeat="traject in trajecten track by $index">
+    <p>Functioneringstraject van {{ traject.datum }}:</p>
+    <p> <input ng-click="getResults(user, $index+1)" value="Resultaten" class="btn btn-red button48" data-page="functioneringsarchief" data-sub="results" data-type="button">
+      <input ng-click="getAgreements(user, $index+1)" value="Afspraken" class="btn btn-red button48" data-page="functioneringsarchief" data-sub="afspraken" data-type="button">
+    </p>
+  </div>
+  <div>&nbsp;</div>
+  <div class="notify" ng-if="ontwikkelingdisplay">
+    <p><button ng-click="ontwikkelingsArchief()" class="btn btn-blue" data-page="functioneringsarchief" data-sub="ontwikkelingstrajecten" data-type="button">Overzicht ontwikkelingstrajecten</button></p>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<div id="content">
+  <!-- Submit display of agreements -->
+  <div class="notify" ng-if="submitdisplay">
+    <div ng-if="!submitteddisplay">
+      <input ng-repeat="agreement in agreements track by $index" type="text" ng-model="agreements[$index]" placeholder="Afspraak {{ $index+1 }}" class="btninput btn75">
+      <button ng-click="removeAgreement()" ng-show="showbutton" class="btn btn-blue" style="float: right;" data-page="functioneringsafspraken" data-sub="aanmaken" data-type="button-small">-</button>
+      <button ng-click="addAgreement()" class="btn btn-red" style="float: right;" data-page="functioneringsafspraken" data-sub="aanmaken" data-type="button-small">+</button>
+      <div class="buttoncent">
+        <button ng-click="submitAgreements()" class="btn btn-red" data-page="functioneringsafspraken" data-sub="aanmaken" data-type="button">Verzend afspraken</button>
+      </div>
+    </div>
+    <p ng-if="submitteddisplay">
+      De afspraken zijn ingevoerd en worden voorgelegd aan de werknemer. Je krijgt een melding zodra deze al dan niet akkoord is.
+    </p>
+  </div>
+  <!-- End Submit display of agreements -->
+
+  <!-- View display of agreements -->
+  <div class="notify" ng-if="viewdisplay">
+    <p>Dit zijn de afspraken van {{ datum }}:</p>
+    <ul class="box">
+      <li ng-repeat="(key, value) in agreements track by $index" ng-if="key !== 'status' && key !== 'datum'" class="box">Afspraak {{ $index + 1 }}: {{ value }}</li>
+    </ul>
+    <p ng-if="approvedisplay">
+      <button ng-click="approveAgreements(false)" class="btn btn-red" data-page="functioneringsafspraken" data-sub="afwijzen" data-type="button">Niet akkoord</button>
+      <button ng-click="approveAgreements(true)" class="btn btn-blue" data-page="functioneringsafspraken" data-sub="accorderen" data-type="button">Akkoord</button>
+    </p>
+    <p ng-if="answer != undefined">{{ answer }}. Dit is verstuurd naar je leidinggevende.</p>
+    <p ng-if="answerSlave != undefined">{{ answerSlave }}</p>
+    <p><button ng-if="pasaan" ng-click="toEditView()" class="btn btn-blue" data-page="functioneringsafspraken" data-sub="editpagina" data-type="button">Pas afspraken aan</button></p>
+  </div>
+  <!-- End View display of agreements -->
+
+  <!-- Edit display of agreements -->
+  <div class="notify" ng-if="editdisplay">
+    <form class="buttoncent">
+      <p>Gemaakte afspraken op {{ datum }}:</p>
+      <div ng-repeat="agreement in editagreements track by $index">Afspraak {{ $index + 1 }}:
+        <input type="text" ng-model="editagreements[$index]" class="btninput btn100">
+      </div>
+      <div class="buttoncent buttonmarg">
+        <button ng-click="removeAgreement()" class="btn btn-green spacer" data-page="functioneringsafspraken" data-sub="editpagina" data-type="button">Verwijder afspraak</button>
+        <button ng-click="addAgreement()" class="btn btn-green spacer" data-page="functioneringsafspraken" data-sub="editpagina" data-type="button">Voeg afspraak toe</button>
+      </div>
+      <input ng-click="editAgreements()" type="submit" value="Pas aan" class="btn btn-blue" data-page="functioneringsafspraken" data-sub="editpagina" data-type="button">
+    </form>
+  </div>
+  <!-- End Edit display of agreements -->
+</div>

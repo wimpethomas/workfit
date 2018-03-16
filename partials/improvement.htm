@@ -3,7 +3,7 @@
   <div ng-show="solutioneditdisplay" class="notify">
     <p>{{ solutionsentence }}</p>
     <!-- Example -->
-    <div>
+    <div ng-if="!hideexampledisplay">
       <p>
         <button class="btn btn-blue" ng-click="showExample(true)" ng-if="!exampledisplay" data-page="ontwikkeling" data-sub="aanmaken-oplossing" data-type="button">Toon voorbeeld</button>
         <button class="btn btn-blue" ng-click="showExample(false)" ng-if="exampledisplay" data-page="ontwikkeling" data-sub="aanmaken-oplossing" data-type="button">Verberg voorbeeld</button>
@@ -29,7 +29,7 @@
   <div ng-show="roadmapdisplay" class="notify">
     <p>Maak een stappenplan om bij de oplossing te komen, maak de laatste stap uit je stappenplan er eentje die er op gericht is om de verandering die je voor ogen heeft blijvend te laten zijn. Wij raden je aan om het gemaakte stappenplan ook te bespreken met een collega die je vertrouwt.</p>
     <!-- Example -->
-    <div>
+    <div ng-if="!hideexampledisplay">
       <p>
         <button class="btn btn-blue" ng-click="showExample(true)" ng-if="!exampledisplay" data-page="ontwikkeling" data-sub="aanmaken-roadmap" data-type="button">Toon voorbeeld</button>
         <button class="btn btn-blue" ng-click="showExample(false)" ng-if="exampledisplay" data-page="ontwikkeling" data-sub="aanmaken-roadmap" data-type="button">Verberg voorbeeld</button>

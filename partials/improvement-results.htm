@@ -1,8 +1,8 @@
 <div id="content">
   <div class="tabcontainer">
-    <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab':isActiveTab(tab)}" data-page="ontwikkelingsresultaten" data-type="tab">{{ tab }}</div>
+    <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab' : isActiveTab(tab), 'func' : tab == 'functionering'}" data-page="ontwikkelingsresultaten" data-sub="tab" data-type="tab">{{ tab }}</div>
   </div>
-  <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result">
+  <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result" ng-class="{'resultfunc' : value.name == 'functionering'}">
     <!-- Archief -->
     <div class="detail">
       <p>Dit is je laatst ingevulde oplossing op het gebied {{ value.name }}:</p>
@@ -26,7 +26,7 @@
   </div>
 
   <!-- Archief per Gebied -->
-  <div ng-if="gebiedviewdisplay" class="result">
+  <div ng-if="gebiedviewdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
     <p>Dit zijn al je ontwikkelingstrajecten op het gebied {{ gebiedsnaam }}:</p>
     <form ng-submit="toResult(gebied, metadata.resultnr)" ng-repeat="metadata in metadatas" class="buttoncent">
       <input type="submit" value="Traject van {{ metadata.datum_start }}" class="btn btn-red" data-page="ontwikkelingsresultaten" data-sub="gebiedsoverzicht" data-type="button">
@@ -36,7 +36,7 @@
   <!-- End Archief per Gebied-->
 
   <!-- View display of result -->
-  <div ng-show="viewresultdisplay" class="result">
+  <div ng-show="viewresultdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
     <p>Dit is je ingevulde oplossing op het gebied {{ gebiedsnaam }}:
       <li class="box">{{ solution }}</li>
     <p>En dit het bijbehorende stappenplan:</p>
@@ -57,7 +57,7 @@
   <!-- End View display of result -->
 
   <!-- Edit display of result -->
-  <div ng-show="editresultdisplay" class="result">
+  <div ng-show="editresultdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
     <form class="buttoncent">
       <p>Oplossing op het gebied {{ gebiedsnaam }}:</p>
       <textarea rows="4" ng-model="editsolution" ng-init="editsolution = solution" class="btninput btn100"></textarea>

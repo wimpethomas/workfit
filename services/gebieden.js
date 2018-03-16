@@ -11,8 +11,22 @@ function getGebieden() {
     'vermoeidheid': 'vermoeidheid',
     'werkdruk': 'werkdruk',
     'gezondheid': 'gezondheid',
-    'fysieke_gezondheid': 'lichamelijke klachten'
+    'fysieke_gezondheid': 'lichamelijke klachten',
+    'functionering': 'functionering'
   };
+  var funconderdelen = ['betrokkenheid', 'competentie', 'gezondheid', 'leidinggevende', 'locus_of_control', 'plezier', 'sociale_steun', 'zelfstandigheid'];
+  var shIndex = {
+    s1: 'Magenta',
+    s2: 'Cyaan',
+    s3: 'Paars',
+    s4: 'Blauw',
+    s5: 'Rood',
+    s6: 'Roze',
+    s7: 'Violet',
+    s8: 'Geel',
+    s9: 'Oranje',
+    s10: 'Groen'
+  }
   var onderdelen = {
     'competentie': {
       'ken': 'kennis',
@@ -80,6 +94,8 @@ function getGebieden() {
     gebiedsnamen: gebiedsnamen,
     gebiedsnamenArr: gebiedsnamenArr,
     traitsnamen: traitsnamen,
-    onderdelen: onderdelen
+    onderdelen: onderdelen,
+    funconderdelen: funconderdelen,
+    shIndex: shIndex
   };
 }

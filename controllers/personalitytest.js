@@ -2,6 +2,7 @@ angular.module('workfit')
 .controller('PersonalityController', PersonalityCtrl);
 
 function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPerUser, ResponseOptions, Store, Gebieden, Functions) {
+  // inFlow EN redirectType ZIJN MIN OF MEER HETZELFDE. REDUNDANTIE ERUITHALEN
   var inFlow = $routeParams.type;
   var nowString = Functions.setWfDate();
   // Set notification date for nulmeting reminder on days + 3 (in test 1)
@@ -21,6 +22,12 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
       var status = responses !== undefined ? responses.status : undefined;
       var isFinished = status == 'closed' ? true : false;
       var storedResult = Store.getResults().resultgebied;
+
+      // There are 3 different types of redirectTypes:
+      // (1) 'flow' (when /personalitytest follows on uitval),
+      // (2) 'results' (when /personalitytest is called from personalityresults to check if finished and get evaluate()),
+      // (3) 'func'/'funcuser' (when /personalitytest is called from functioneringsresults (role == werknemer) to check if finished and get evaluate()),
+
       var redirectType = $routeParams.type !== undefined ? $routeParams.type : (storedResult == undefined ? 'results' : undefined);
       if (isFinished) evaluate(username, responses, traitSpecs, isFinished, redirectType); // In this case test questions can be skipped
       else {
@@ -53,7 +60,7 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
         $scope.questionsLength = $scope.questions.length;
         // And display the right question. If new user first question is displayed
         if (responses == null) {
-          if (inFlow == 'flow') $scope.startfromflowdisplay = true;
+          if (inFlow == 'flow' || inFlow == 'func' || inFlow.indexOf('funcuser') > -1) $scope.startfromflowdisplay = true;
           else $scope.startPersonality('new');
         } else {
           // Count which questions are already answered
@@ -111,66 +118,11 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
     var isRedirect = redirectType == undefined ? false : true;
     if (!isFinished || isRedirect) {
       console.log('Case 1 personalitytest: Test is nog niet af (' + !isFinished + ') OF het is een redirect van results/advies (' + isRedirect + ').');
-      var scores = {
-        extraversie: {
-          max: 0,
-          real: 0,
-          traitChars: []
-        },
-        vriendelijkheid: {
-          max: 0,
-          real: 0,
-          traitChars: []
-        },
-        zorgvuldigheid: {
-          max: 0,
-          real: 0,
-          traitChars: []
-        },
-        emotionele_stabiliteit: {
-          max: 0,
-          real: 0,
-          traitChars: []
-        },
-        intellectuele_autonomie: {
-          max: 0,
-          real: 0,
-          traitChars: []
-        }
-      };
-
-      // Fill max en real scores in scores object by going through responses
-      for (var response in responses) {
-        if (response !== 'status' && response !== 'datum') {
-          var value = responses[response].q;
-          var mixed = responses[response].mixed;
-          for (var j = 0; j < responses[response].gebied.length; j++) {
-            var factor = j == 0 ? 1 : 0.5;
-            scores[responses[response].gebied[j]].max = scores[responses[response].gebied[j]].max + factor;
-            if (mixed && j == 1) scores[responses[response].gebied[j]].real = scores[responses[response].gebied[j]].real - factor * value;
-            else scores[responses[response].gebied[j]].real = scores[responses[response].gebied[j]].real + factor * value;
-          }
-        }
-      }
-
-      // Based on final real score (>0 or <0) add trait characteristics to scores object
-      for (var trait in scores) {
-        scores[trait].name = Gebieden.traitsnamen[trait];
-        var score = scores[trait].real;
-        if (score < -3) {
-          scores[trait].traitChars = traits[trait].low;
-          scores[trait].traitResults = traits[trait].result.low;
-        } else if (score > 3) {
-          scores[trait].traitChars = traits[trait].high;
-          scores[trait].traitResults = traits[trait].result.high;
-        } else {
-          scores[trait].traitChars = traits[trait].middle;
-          scores[trait].traitResults = traits[trait].result.middle;
-        }
-      }
-
+      var scores = Functions.getPersScores(responses, traits, 'pers');
       Store.setResults('personality', scores);
       if (redirectType == 'results') $location.path('/personalityresults');
+      else if (redirectType == 'func') $location.path('/functioneringsresults/werknemer/');
+      else if (redirectType.indexOf('funcuser') > -1) $location.path('/functioneringsresults/werknemer/' + username + '/' + redirectType.split('-')[1]);
       else $location.path('/advies');
     } else {
       console.log('Case 2 personalitytest: Test is al gedaan en het is geen redirect van results/advies.')

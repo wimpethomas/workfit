@@ -1,10 +1,10 @@
 var config = {
-  apiKey: "AIzaSyCPEHUsuIv1Ww2845q33QU_ohTu-MteDls",
-  authDomain: "workfit-adde0.firebaseapp.com",
-  databaseURL: "https://workfit-adde0.firebaseio.com",
-  projectId: "workfit-adde0",
-  storageBucket: "",
-  messagingSenderId: "686177789160"
+  apiKey: "AIzaSyD87-VF66Pqcdo1RiGesY7ReyNmOqrNrhQ",
+  authDomain: "workfit-staging.firebaseapp.com",
+  databaseURL: "https://workfit-staging.firebaseio.com",
+  projectId: "workfit-staging",
+  storageBucket: "workfit-staging.appspot.com",
+  messagingSenderId: "239348273347"
 };
 firebase.initializeApp(config);
 
@@ -31,8 +31,9 @@ var uiConfig = {
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtube-embed', 'angular-inview'])
+angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtube-embed', 'angular-inview', 'angularjs-dropdown-multiselect'])
 .directive('wfMenu', wfMenu)
+.directive('wfLogin', Login)
 .config(function($routeProvider) {
   $routeProvider
   .when("/", {
@@ -71,7 +72,7 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/advice.htm",
     controller: AdviceCtrl
   })
-  .when("/verbetertraject", {
+  .when("/verbetertraject/:fid?", {
     templateUrl: "partials/improvement.htm",
     controller: ImprovementCtrl
   })
@@ -82,6 +83,22 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
   .when("/faq", {
     templateUrl: "partials/faq.htm",
     controller: FaqCtrl
+  })
+  .when("/functioneringstest/:role?", {
+    templateUrl: "partials/functioneringstest.htm",
+    controller: FuncTestCtrl
+  })
+  .when("/functioneringsresults/:role?/:user?/:fid?", {
+    templateUrl: "partials/functioneringsresults.htm",
+    controller: FuncResultsCtrl
+  })
+  .when("/functioneringsafspraken/:role?/:mode?/:user?/:fid?", {
+    templateUrl: "partials/functioneringsafspraken.htm",
+    controller: FuncAfsprakenCtrl
+  })
+  .when("/functioneringsarchief/:role?/:user?", {
+    templateUrl: "partials/functioneringsarchief.htm",
+    controller: FuncArchiefCtrl
   })
   .when("/userdata", {
     templateUrl: "partials/userdata.htm",
@@ -95,6 +112,10 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/admin.htm",
     controller: AdminCtrl
   })
+  .when("/adminusers", {
+    templateUrl: "partials/adminusers.htm",
+    controller: AdminUsersCtrl
+  })
   .when("/0test", {
     templateUrl: "partials/0test.htm",
     controller: TestCtrl
@@ -104,23 +125,54 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
   });
 })
 .factory('QuestionsNew', getQuestionsNew)
+.factory('Customers', getCustomers)
+.factory('UserData', getUserData)
 .factory('ResponsesPerUser', getResponsesPerUser)
-.factory('User', getUser);
+.factory('User', getUser)
+.controller('LoginController', LoginCtrl);
 
 function getQuestionsNew($firebaseObject, User) {
   return User.then(function(userObj) {
     // If user is logged in
-    if (userObj !== null) {
+    if (userObj !== null && userObj !== 'anonymous') {
       var refQ = firebase.database().ref().child('questions');
       return $firebaseObject(refQ).$loaded();
     } else return false;
   });
 }
 
+function getCustomers($firebaseObject, User) {
+  return User.then(function(userObj) {
+    // If user is logged in
+    if (userObj !== null && userObj !== 'anonymous') {
+      var email = userObj.email;
+      var refK = firebase.database().ref().child('klanten');
+      return {
+        email: email,
+        customers: $firebaseObject(refK).$loaded()
+      };
+    } else return false;
+  });
+}
+
+function getUserData($firebaseObject, User) {
+  return User.then(function(userObj) {
+    // If user is logged in
+    if (userObj !== null && userObj !== 'anonymous') {
+      var email = userObj.email;
+      var refR = firebase.database().ref('klanten').orderByChild("email").equalTo(email);
+      return $firebaseObject(refR).$loaded();
+    } else return false;
+  }).then(function(userData) {
+    var pushId = Object.keys(userData).pop();
+    return userData[pushId];
+  });
+}
+
 function getResponsesPerUser($firebaseObject, User) {
   return User.then(function(userObj) {
     // If user is logged in
-    if (userObj !== null) {
+    if (userObj !== null && userObj !== 'anonymous') {
       var username = userObj.email.replace('.', '_');
       username = username.replace('@', '_');
       var refR = firebase.database().ref().child('responses/' + username);
@@ -141,7 +193,10 @@ function getUser() {
         resolve(user);
         analytics.user = user.email;
       }
-      else ui.start('#firebaseui-auth-container', uiConfig);
+      else {
+        resolve('anonymous');
+        document.getElementById('spinner').style.display = 'none';
+      }
     });
   });
   return userName;
@@ -178,4 +233,91 @@ function wfMenuCtrl($scope, User) {
     firebase.auth().signOut();
     location.reload();
   }
+}
+
+function Login() {
+  return {
+    restrict: 'E',
+    templateUrl: 'partials/login.htm',
+    controller: LoginCtrl
+  };
+}
+
+function LoginCtrl($scope, User) {
+  User.then(function(data) {
+    //console.log(data);
+    if (data == 'anonymous') {
+      $scope.logindisplay = true;
+      document.getElementById('wrapper').style.display = 'none';
+    } else document.getElementById('loginunit').remove();
+
+    $scope.login = function() {
+      firebase.auth().signInWithEmailAndPassword($scope.email, $scope.password).then(function(user) {
+        console.log(user);
+        firebase.auth.Auth.Persistence.LOCAL;
+        location.reload();
+      }).
+      catch (function(error) {
+        var errorCode = error.code;
+        $scope.$apply(function() {
+          if (errorCode == 'auth/invalid-email' || errorCode == 'auth/user-not-found') {
+            $scope.pwerror = undefined;
+            if (errorCode == 'auth/invalid-email') $scope.unerror = 'Vul een geldig email-adres in.';
+            else if (errorCode == 'auth/user-not-found') $scope.unerror = 'E-mailadres bestaat niet als gebruiker bij WorkFit. Registreer je eerst.';
+          } else if (errorCode == 'auth/wrong-password') {
+            $scope.unerror = undefined;
+            $scope.pwerror = 'Het opgegeven wachtwoord is ongeldig.';
+          }
+        });
+      });
+    }
+
+    $scope.signup = function() {
+      var usersToCheck = firebase.database().ref('klanten').orderByChild("email").equalTo($scope.email).once("value").then(function(snapshot) {
+        return snapshot.val();
+      }).then(function(registeredEmail) {
+        // Email is posted by company admin, so user can register with this email adress
+        if (registeredEmail !== null) {
+          firebase.auth().createUserWithEmailAndPassword($scope.email, $scope.password).then(function(user) {
+            console.log(user);
+            firebase.auth.Auth.Persistence.LOCAL;
+            location.reload();
+          }).
+          catch (function(error) {
+            var errorCode = error.code;
+            $scope.$apply(function() {
+              if (errorCode == 'auth/invalid-email' || errorCode == 'auth/email-already-in-use') {
+                $scope.pwrerror = undefined;
+                if (errorCode == 'auth/invalid-email') $scope.unrerror = 'Het opgegeven e-mailadres is al in gebruik';
+                else if (errorCode == 'auth/email-already-in-use') $scope.unrerror = 'Het opgegeven e-mailadres is al in gebruik';
+              } else if (errorCode == 'auth/weak-password') {
+                $scope.unrerror = undefined;
+                $scope.pwrerror = 'Het opgegeven wachtwoord is te zwak. Kies een moelijker wachtwoord';
+              }
+            });
+          });
+        } else {
+          $scope.$apply(function() {
+            $scope.unrerror = 'Het e-mailadres is niet opgegeven door je bedrijf. Neem contact op met je H&R-medewerker.';
+          });
+        }
+      });
+    }
+
+    $scope.reset = function() {
+      firebase.auth().sendPasswordResetEmail($scope.email).then(function() {
+        console.log('Mail sent');
+        $scope.$apply(function() {
+          $scope.resetdisplay = false;
+          $scope.resetsentdisplay = true;
+        });
+      }).
+      catch (function(error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log(errorCode);
+        console.log(errorMessage);
+      });
+    }
+  });
 }

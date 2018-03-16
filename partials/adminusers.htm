@@ -1,0 +1,48 @@
+<div id="content">
+  <div class="notify" ng-show="addusersdisplay">
+    <div class="buttoncent">
+      <button class="btn btn-green" ng-click="multiadd = false; userlist = false" ng-show="multiadd || userlist">Voeg enkele user(s) toe</button>
+      <button class="btn btn-green" ng-click="multiadd = true; userlist = false" ng-show="!multiadd">Voeg meerdere users toe</button>
+      <button class="btn btn-green" ng-click="multiadd = false; userlist = true" ng-show="!userlist">Beheer users</button>
+    </div>
+    <div ng-show="!multiadd && !userlist">
+      <p>Invoer voor enkele user(s)</p>
+      <div ng-repeat="email in users track by $index" class="btninput btn75" style="float: left;">
+        <div class="btn100">
+          <input type="text" ng-model="users[$index].email" placeholder="Gebruiker {{ $index+1 }}" class="btninput">
+          <div ng-dropdown-multiselect="" options="roledataSuperAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" style="float:right;" ng-show="bedrijfdisplay"></div>
+          <div ng-dropdown-multiselect="" options="roledataAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" style="float:right;" ng-show="!bedrijfdisplay"></div>
+          <div ng-dropdown-multiselect="" options="leidingEmail" selected-model="users[$index].leidinggevende" extra-settings="lgsettings" translation-texts="lgcustomTexts" style="float:left;" ng-if="isWerknemer($index)"></div>
+        </div>
+        <input type="text" ng-model="users[$index].bedrijf" placeholder="Bedrijf {{ $index+1 }}" class="btninput btn100" ng-show="bedrijfdisplay">
+      </div>
+      <button ng-click="removeUser()" ng-show="showbutton" class="btn btn-blue" style="float: right;">-</button>
+      <button ng-click="addUser()" class="btn btn-red" style="float: right;">+</button>
+      <div>
+        <button ng-click="submitUsers()" class="btn btn-red">Voeg users toe</button>
+      </div>
+      <pre style="clear:both;">{{ users | json }}</pre>
+
+    </div>
+    <div ng-show="multiadd && !userlist">
+      <textarea rows="4" ng-model="userlist" placeholder="Plak hier de e-mailadressen. Doe dit komma gescheiden of 1 e-mailadres per regel" class="btninput btn100" required></textarea>
+      <p><button ng-click="submitMultipleUsers()" class="btn btn-red">Voeg users toe</button></p>
+    </div>
+    <div ng-show="userlist && !multiadd">
+      <table>
+        <tr>
+          <th>Gebruiker</th>
+          <th>Rollen</th>
+          <th>Leidinggevende</th>
+          <th></th>
+        </tr>
+        <tr ng-repeat="user in manageusers">
+          <td>{{ user.email }}</td>
+          <td>{{ user.type }}</td>
+          <td>{{ user.boss }}</td>
+          <td><button class="btn btn-red" ng-click="deleteUser(user)">X</button></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

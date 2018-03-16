@@ -1,0 +1,128 @@
+<div id="content">
+  <div class="notify" ng-if="norightsdisplay">
+    <p>Je account geeft geen toegang tot deze functionaliteit, omdat je niet als leidinggevende of werknemer bent opgegeven. Denk je dat je wel toegang zou moeten hebben, neem dan contact op met de HR-afdeling / medewerker.</p>
+    <p><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="norights" data-type="button">Terug</button></p>
+  </div>
+
+  <div class="notify" ng-if="chooseroleddisplay">
+    <p>Je hebt de rollen leidinggevende en werknemer in je account; je dient dus zowel functioneringsgesprekken af te nemen (in je rol als leidinggevende) als te volgen (in je rol als werknemer).<br>
+      Kies één van deze twee rollen om verder te gaan.</p>
+    <p><button ng-click="chooseRole('boss')" class="btn btn-blue" data-page="functionering-test" data-sub="kiesrol" data-type="button">Leidingevende</button></p>
+    <p><button ng-click="chooseRole('slave')" class="btn btn-blue" data-page="functionering-test" data-sub="kiesrol" data-type="button">Werknemer</button></p>
+  </div>
+
+  <div class="notify" ng-if="bossstartdisplay">
+    <div ng-dropdown-multiselect="" options="slavedddata" selected-model="slaveddmodel" extra-settings="slaveddsettings" translation-texts="slaveddcustomTexts" events="slaveddevent"></div>
+    <div>&nbsp;</div>
+    <div ng-show="slaveselected">
+      <div ng-show="!activetrajectdisplay">
+        <div>Start een traject voor het functioneringsgesprek middels een vragenlijst. Deze wordt ook gestuurd naar {{ slaveddmodel[0] }}.</div>
+        <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="start-leidinggevende" data-type="button">Start nieuw functioneringstraject</button></div>
+        <div>&nbsp;</div>
+      </div>
+      <div ng-show="activetrajectdisplay">
+        <div ng-show="!bossfinisheddisplay">
+          <div>Er loopt een traject voor een functioneringsgesprek, maar je hebt de vragenlijst nog niet afgerond.</div>
+          <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="finish-leidinggevende" data-type="button">Rond vragenlijst af</button></div>
+          <div>&nbsp;</div>
+        </div>
+        <div ng-show="bossfinisheddisplay">
+          <div ng-if="!viewagreementsdisplay">
+            <div>Er loopt een traject voor een functioneringsgesprek. Bekijk de ingevulde vragenlijsten: die van jezelf en die van {{ slaveddmodel[0] }} ter voorbereiding van het functioneringsgesprek.</div>
+            <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="bekijkresultaten-leidinggevende" data-type="button">Resultaten vragenlijst</button></div>
+            <div>&nbsp;</div>
+            <div>Voer de gemaakte afspraken uit het laatste functioneringsgesprek in.</div>
+            <div><button ng-click="setAgreements('leidinggevende')" class="btn btn-blue" data-page="functionering-test" data-sub="maak-afspraken" data-type="button">Voer afspraken in</button></div>
+          </div>
+          <div ng-if="viewagreementsdisplay">
+            <div ng-if="!disapproveddisplay && !rependeddisplay">Bekijk de afspraken uit het laatste functioneringsgesprek.</div>
+            <div ng-if="disapproveddisplay">{{ slaveddmodel[0] }} heeft de ingevoerde afspraken uit het laatste functioneringsgesprek afgekeurd. Pas de afspraken aan of overleg met de medewerker.</div>
+            <div ng-if="rependeddisplay">Je hebt de door {{ slaveddmodel[0] }} afgewezen afspraken aangepast. Deze zijn opnieuw naar {{ slaveddmodel[0] }} gestuurd ter goedkeuring.</div>
+            <div><button ng-click="viewAgreements('leidinggevende')" class="btn btn-blue" data-page="functionering-test" data-sub="bekijk-afspraken" data-type="button">Bekijk afspraken</button></div>
+          </div>
+          <div>&nbsp;</div>
+          <div ng-if="ontwikkelingsdisplay">
+            <div>Het functioneringstraject zal worden afgerond zodra {{ slaveddmodel[0] }} met een ontwikkelingstraject aan de slag is gegaan. Wil je hier niet op wachten, rond dan zelf dit traject af.</div>
+            <div><button ng-click="closeTraject()" class="btn btn-blue" data-page="functionering-test" data-sub="rond-af" data-type="button">Rond traject af</button></div>
+          </div>
+          <div>&nbsp;</div>
+        </div>
+      </div>
+      <div ng-show="!noarchivedisplay">
+        <div>Ga naar het archief om data van oude functioneringstrajecten van {{ slaveddmodel[0] }} terug te zien.</div>
+        <div><button ng-click="getFuncArchive('leidinggevende', slaveddmodel[0])" class="btn btn-blue" data-page="functionering-test" data-sub="bekijkarchief" data-type="button">Oude functioneringstrajecten</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notify" ng-if="slavestartdisplay">
+    <div ng-if="!activetrajectdisplay">
+      <div>Er loopt geen traject voor een functioneringsgesprek momenteel. Klopt dit volgens jou niet, neem dan contact op met je leidinggevende.</div>
+      <div><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="notests" data-type="button">Nulmeting</button></div>
+      <div>&nbsp;</div>
+    </div>
+    <div ng-if="activetrajectdisplay">
+      <div ng-if="!slavestarteddisplay">
+        <div>Je leidinggevende heeft een traject voor een functioneringsgesprek opgestart. Doe de voorbereiding voor het aankomende functioneringsgesprek.</div>
+        <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="start-werknemer" data-type="button">Start vragenlijst</button></div>
+        <div>&nbsp;</div>
+      </div>
+      <div ng-if="slavestarteddisplay">
+        <div ng-if="!slavefinisheddisplay">
+          <div>Er loopt een traject voor een functioneringsgesprek, maar je hebt de vragenlijst nog niet afgerond.</div>
+          <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="finish-werknemer" data-type="button">Rond vragenlijst af</button></div>
+          <div>&nbsp;</div>
+        </div>
+        <div ng-if="slavefinisheddisplay && !ontwikkelingsdisplay">
+          <div>Er loopt een traject voor een functioneringsgesprek. Bekijk de ingevulde vragenlijsten: die van jezelf en die van {{ slaveddmodel[0] }} ter voorbereiding van het functioneringsgesprek.</div>
+          <div><button ng-click="startTest()" class="btn btn-blue" data-page="functionering-test" data-sub="bekijkresultaten-leidinggevende" data-type="button">Resultaten vragenlijst</button></div>
+          <div>&nbsp;</div>
+          <div ng-if="!viewagreementsdisplay">
+            <div>Je leidinggevende heeft de afspraken uit het laatste functioneringsgesprek nog niet vastgelegd. Help hem hier aan te herinneren.</div>
+          </div>
+          <div ng-if="viewagreementsdisplay">
+            <div ng-if="!rependeddisplay && !disapproveddisplay">Je leidinggevende heeft de afspraken uit het laatste functioneringsgesprek vastgelegd.</div>
+            <div ng-if="rependeddisplay">Je leidinggevende heeft de door jou afgewezen afspraken aangepast. Kijk of je het er nu wel mee eens bent.</div>
+            <div ng-if="disapproveddisplay">Je leidinggevende heeft de afspraken uit het laatste functioneringsgesprek vastgelegd, maar je bent niet akkoord met deze afspraken.</div>
+            <div><button ng-click="viewAgreements('werknemer')" class="btn btn-blue" data-page="functionering-test" data-sub="bekijk-afspraken" data-type="button">Bekijk afspraken</button></div>
+          </div>
+          <div>&nbsp;</div>
+        </div>
+        <div ng-if="ontwikkelingsdisplay">
+          <div>Het functioneringsgesprek heeft plaatsgevonden en je bent akkoord met de afspraken. Verwerk deze output als je wilt tot een ontwikkelingstraject.</div>
+          <button ng-click="closeTraject()" class="btn btn-red" data-page="functionering-test" data-sub="rond-af" data-type="button">Sla over</button>
+          <button ng-click="startOntwikkeling()" class="btn btn-blue" data-page="functionering-test" data-sub="start-ontwikkeling" data-type="button">Start ontwikkelingstraject</button>
+        </div>
+        <div>&nbsp;</div>
+      </div>
+    </div>
+    <div ng-show="!noarchivedisplay">
+      <div>Ga naar het archief om data van oude functioneringstrajecten van {{ slaveddmodel[0] }} terug te zien.</div>
+      <div><button ng-click="getFuncArchive('werknemer')" class="btn btn-blue" data-page="functionering-test" data-sub="bekijkarchief" data-type="button">Oude functioneringstrajecten</button></div>
+    </div>
+  </div>
+
+  <div ng-show="questionsdisplay" class="questions">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+      <div class="progressbar">
+        <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="functionering-test" data-sub="test" data-type="button-small">Terug</button>
+        <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="functionering-test" data-sub="test" data-type="button-small">Volgende</button>
+      </div>
+      <div class="progress">vraag {{ $index + 1 }} van {{ questionsLength }}</div>
+      <div class="detail"><p>{{ question.q }}</p></div>
+      <div class="responseops">
+        <span ng-repeat="n in (question.pos ? posvalues : negvalues)">
+          <input type="radio" ng-model="nulgebied_answer" value="{{ n.val }}" ng-change="changedRN(nulgebied_answer,'{{ $parent.question.onderdeel }}',{{ $parent.$index }})" name="{{ $parent.question.onderdeel }}-{{ $parent.$index }}" id="{{ $parent.question.onderdeel }}-{{ $parent.$index }}-{{ n.val }}" class="radio"/>
+          <label for="{{ $parent.question.onderdeel }}-{{ $parent.$index }}-{{ n.val }}" data-page="functionering-test" data-sub="test" data-type="option">{{ n.label[question.ro] }}</label>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="navlinks">
+      <button ng-click="getOverview()" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Overzicht</button>
+      <button ng-click="startTest()" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Resultaten</button>
+      <button ng-click="viewAgreements(role)" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Afspraken</button>
+      <button ng-click="getFuncArchive(role, slaveddmodel[0])" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Archief</button>
+  </div>
+</div>

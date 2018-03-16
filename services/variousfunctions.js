@@ -1,7 +1,7 @@
 angular.module('workfit')
 .service('Functions', getFunction);
 
-function getFunction(Gebieden) {
+function getFunction(Gebieden, ResponseOptions) {
   var lastResultPerGebied = function(responses, gebied, type, status) {
     // Returns last started/closed/all [type] results data per gebied ordered on datum
     var dateProp = status == 'all' ? 'datum' : (status == 'started' ? 'datum_start' : 'datum_end');
@@ -58,7 +58,7 @@ function getFunction(Gebieden) {
     return metadata;
   };
 
-  rewriteDBResults = function(resultset, gebied, rewritten) {
+  var rewriteDBResults = function(resultset, gebied, rewritten) {
     if (!rewritten) {
       var onderdelenObj = Gebieden.onderdelen[gebied];
       var vals = resultset.vals;
@@ -121,12 +121,118 @@ function getFunction(Gebieden) {
     } else return datum.toISOString();
   }
 
+  var getPersScores = function(responses, traits, ref) {
+    var scores = {
+      extraversie: {max: 0, real: 0, traitChars: []},
+      vriendelijkheid: {max: 0, real: 0, traitChars: []},
+      zorgvuldigheid: {max: 0, real: 0, traitChars: []},
+      emotionele_stabiliteit: {max: 0, real: 0, traitChars: []},
+      intellectuele_autonomie: {max: 0, real: 0, traitChars: []}
+    };
+
+    // Fill max en real scores in scores object by going through responses
+    for (var response in responses) {
+      if (response !== 'status' && response !== 'datum' && response !== 'shared') {
+        var value = responses[response].q;
+        var mixed = responses[response].mixed;
+        for (var j = 0; j < responses[response].gebied.length; j++) {
+          var factor = j == 0 ? 1 : 0.5;
+          scores[responses[response].gebied[j]].max = scores[responses[response].gebied[j]].max + factor;
+          if (mixed && j == 1) scores[responses[response].gebied[j]].real = scores[responses[response].gebied[j]].real - factor * value;
+          else scores[responses[response].gebied[j]].real = scores[responses[response].gebied[j]].real + factor * value;
+        }
+      }
+    }
+
+    // Based on final real score (>0 or <0) add trait characteristics to scores object
+    for (var trait in scores) {
+      scores[trait].name = Gebieden.traitsnamen[trait];
+      var score = scores[trait].real;
+      if (score < -3) {
+        scores[trait].traitChars = traits[trait].low;
+        if (ref == 'pers') scores[trait].traitResults = traits[trait].result.low;
+        else if (ref == 'func') scores[trait].traitBoss = traits[trait].leidinggevende.low;
+      } else if (score > 3) {
+        scores[trait].traitChars = traits[trait].high;
+        if (ref == 'pers') scores[trait].traitResults = traits[trait].result.high;
+        else if (ref == 'func') scores[trait].traitBoss = traits[trait].leidinggevende.high;
+      } else {
+        scores[trait].traitChars = traits[trait].middle;
+        if (ref == 'pers') scores[trait].traitResults = traits[trait].result.middle;
+      }
+    }
+    return scores;
+  }
+
+  var getResponsesPerFuncUser = function(user, dbentry) {
+    if (user.indexOf('@') > -1){
+      var user = user.replace('.', '_');
+      user = user.replace('@', '_');
+    }
+    return {
+      username: user,
+      data: firebase.database().ref().child('responses/' + user + '/' + dbentry).once('value')
+    };
+  }
+
+  function getFuncTrajects(responses) {
+    // Return status and number of last traject and statusses of test within.
+    var funcObj = responses == undefined ? undefined : responses; // Object on level /functionering
+    var latest = [undefined, 0]; // latest[0] = trajectName, latest[1] = datum
+    for (func in funcObj) {
+      var dateFunc = funcObj[func].datum !== undefined ? Date.parse(funcObj[func].datum) : 0;
+      if (dateFunc > latest[1]) latest = [func, dateFunc];
+    }
+    if (latest[0] !== undefined){
+      var funcNr = latest[0].split('-')[1];
+      var statusLastFunc = funcObj[latest[0]].status;
+      var funcArr = Object.keys(funcObj); // Array with trajects in db /functionering
+      var nrOfTests = funcArr.length;
+      // Next variables are extra compared to other function in /tests
+      var statusSlaveTest = funcObj[latest[0]].test.werknemer == undefined ? undefined : funcObj[latest[0]].test.werknemer.status;
+      var statusBossTest = funcObj[latest[0]].test.leidinggevende.status;
+      var statusAgreements = funcObj[latest[0]].afspraken == undefined ? undefined : funcObj[latest[0]].afspraken.status;
+      return {
+        status: statusLastFunc,
+        amount: nrOfTests,
+        funcnr: parseInt(funcNr),
+        statusSlaveTest: statusSlaveTest,
+        statusBossTest:statusBossTest,
+        statusAgreements: statusAgreements
+      };
+    } else return undefined;
+  }
+
+  function getFuncScores(responses){
+    var valueRange = ResponseOptions.posvalues.length - 1;
+    var scores = [];
+    for (var onderdeel in responses) {
+      var values = Object.values(responses[onderdeel]);
+      var maxScore = values.length * valueRange;
+      var sum = values.reduce(function(a, b) {
+        return parseInt(a) + parseInt(b);
+      }, 0);
+      if (sum > -1) {
+        scores.push({
+          onderdeel: onderdeel,
+          totaalScore: sum,
+          maxScore: maxScore
+        });
+      }
+    }
+    return scores;
+  }
+
   return {
     lastResultPerGebied: lastResultPerGebied,
     metadataPerResult: metadataPerResult,
     rewriteDBResults: rewriteDBResults,
     addNiveaus: addNiveaus,
     lastUnfinishedResult: lastUnfinishedResult,
-    setWfDate: setWfDate
+    setWfDate: setWfDate,
+    getPersScores: getPersScores,
+    getResponsesPerFuncUser: getResponsesPerFuncUser,
+    getFuncTrajects: getFuncTrajects,
+    getFuncScores: getFuncScores
   };
 }

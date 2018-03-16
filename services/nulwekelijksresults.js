@@ -9,6 +9,9 @@ angular.module('workfit')
 // type = resultgebied: String with chosen gebied for advice (on result page ==> "competentie"
 // type = personality: Object with max en werkelijke score per trait ==> {"emotionele_stabiliteit": {"max": 5, "real": 3}, ......}
 
+// type = funcresults: Object with username and trajectStr (because of leidinggevende) and an array with objects with score and maxscore per onderdeel ==> {user: '', traject: '', results: [{onderdeel: "betrokkenheid", totaalScore: 8, maxScore: 12},....]
+
+
 function getSetter() {
   var data = {};
   var setResults = function(type, result) {

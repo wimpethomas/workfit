@@ -53,7 +53,6 @@ function ProfileCtrl($scope, $location, $routeParams, $firebaseObject, Responses
   ResponsesPerUser.then(function(data) {
     var username = data.username;
     data.responses.then(function(responses) {
-      document.getElementById('spinner').style.display = 'none';
       var responsesNulm = responses.nulmeting;
       var status = responsesNulm == undefined ? undefined : responsesNulm.status;
       if (responsesNulm == undefined || status !== 'closed') $location.path('/nulmeting');

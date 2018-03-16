@@ -1,0 +1,49 @@
+<div id="loginunit">
+  <div ng-show="logindisplay" class="notify" id="login">
+    <p>Inloggen</p>
+    <form ng-submit="login()">
+      <input type="email" ng-model="email" placeholder="Email" class="btninput btn100" required>
+      <div class="error">{{ unerror }}</div>
+      <input type="password" ng-model="password" placeholder="Password" class="btninput btn100" required>
+      <div class="error">{{ pwerror }}</div>
+      <div>
+        <div class="prev smalltext">Nog geen account?&nbsp;<a class="underline" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay">Registreer je</a>
+          <br>
+          <a class="underline" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay">Problemen met inloggen</a>
+        </div>
+        <input class="btn btn-red next topspace" type="submit" value="Login">
+      </div>
+    </form>
+  </div>
+  <div ng-show="signupdisplay" class="notify">
+    <p>Registreren</p>
+    <form ng-submit="signup()">
+      <input type="email" ng-model="email" placeholder="Email" class="btninput btn100">
+      <div class="error">{{ unrerror }}</div>
+      <input type="password" ng-model="password" placeholder="Password" class="btninput btn100">
+      <div class="error">{{ pwrerror }}</div>
+      <div>
+        <div class="prev smalltext">Al een account?&nbsp;<a class="underline" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay">Login</a>
+        </div>
+        <input class="btn btn-red next topspace" type="submit" value="Registreer">
+      </div>
+    </form>
+  </div>
+  <div ng-show="resetdisplay" class="notify">
+    <p>Wachtwoord reset</p>
+    <p>Er wordt een e-mail naar dit adres verzonden met instructies om je wachtwoord te resetten</p>
+    <form ng-submit="reset()">
+      <input type="email" ng-model="email" placeholder="Email" class="btninput btn100">
+      <div>
+        <div class="prev"><a class="underline" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay">Annuleer</a>
+        </div>
+        <input class="btn btn-red next topspace" type="submit" value="Verzend">
+      </div>
+    </form>
+  </div>
+  <div ng-show="resetsentdisplay" class="notify">
+    <p>Wachtwoord verstuurd</p>
+    <p>Een wachtwoord reset link is verstuurd naar je e-mailadres.</p>
+    <button class="btn btn-red" ng-click="logindisplay = !logindisplay; resetsentdisplay = !resetsentdisplay">Login</button>
+  </div>
+</div>

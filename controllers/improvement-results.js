@@ -149,6 +149,10 @@ function ImprovementResultsCtrl($scope, $location, $routeParams, ResponsesPerUse
       }
       $scope.results = resultsObj;
       console.log($scope.results);
+      // Put functionering last in tabs if exists
+      var funcTabIndex = $scope.tabs.indexOf('functionering');
+      var nrOfTabs = $scope.tabs.length;
+      $scope.tabs.splice(nrOfTabs - 1, 0, $scope.tabs.splice(funcTabIndex, 1)[0]);
     }
 
     $scope.editResult = function(gebied, roadmap) {
@@ -158,6 +162,7 @@ function ImprovementResultsCtrl($scope, $location, $routeParams, ResponsesPerUse
         if (roadmap[i].datum_start !== undefined) firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + i + '/datum_start').set(roadmap[i].datum_start);
         if (roadmap[i].datum_end !== undefined) firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + i + '/datum_end').set(roadmap[i].datum_end);
         if (i !== roadmap.length - 1) {
+          // Is done because created object has $$hashkey. Can be avoided with track $index in the ng-repeat. TODO
           firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + i + '/step').set(roadmap[i].step);
           firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + i + '/feedback').set(roadmap[i].feedback);
         } else {
