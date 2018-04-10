@@ -2,26 +2,33 @@ angular.module('workfit')
 .controller('FuncResultsController', FuncResultsCtrl);
 
 function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, QuestionsNew, Store, Gebieden, Functions) {
+  // GA FUNCRESULTS EN FUNCDATA SAMENVOEGEN IN 1 OBJECT! VOORKOMT DUBBELE CODE BIJ HET DEFINIEREN VAN VARIABLE IN BEGIN EN DE $SCOPE.MENUNAV FUNCTIE
   var funcResults = Store.getResults().funcresults;
+  var funcData = Store.getResults().funcdata;
   var urlRole = $routeParams.role;
-  $scope.user = $routeParams.user !== undefined ? $routeParams.user : funcResults.user;
+  var user = $routeParams.user !== undefined ? $routeParams.user : funcResults.user;
   var trajectStr = $routeParams.fid !== undefined ? 'traject-' + $routeParams.fid : (funcResults !== undefined ? funcResults.traject : undefined);
   var prevTrajectNr = $routeParams.fid !== undefined ? $routeParams.fid - 1 : (funcResults !== undefined ? parseInt(funcResults.traject.split('-')[1]) - 1 : undefined);
   var prevTrajectStr = prevTrajectNr < 1 || prevTrajectNr == undefined ? undefined : 'traject-' + prevTrajectNr;
-  console.log(prevTrajectStr);
+  //console.log(prevTrajectStr);
+  $scope.nav = 'results';
+  if ($routeParams.user !== undefined) $scope.navlinksdisplay = true;
+  else if (funcData !== undefined) $scope.navlinksdisplay = funcData.trajectnr > 0 ? true : false;
 
   // Calculate results and store them in array for charts
   function chartData(scoresNow, scoresWas){
     if (scoresWas == undefined) var chartData = [["Onderdeel", "Cijfer", {type: "string", role: "style"}]];
     else var chartData = [["Onderdeel", "Cijfer (was)", {type: "string", role: "style"}, "Cijfer (is)", {type: "string", role: "style"}]];
-    var colors = ['#df3efc', '#d8386e', '#34472c', '#f8eff1', '#26da6f', '#fe30ac', '#3366cc', '#c20421']; //Backup color: #70db61, #19d8f4,#a65c9d
+    var colors = ['#d73027', '#f46d43', '#fdae61', '#fee090', '#e0f3f8', '#abd9e9', '#74add1', '#4575b4'];
+    var colorsWas = ['#E36F69', '#F79A7C', '#FDC691', '#FEE9B1', '#E9F6FB', '#C3E5EF	', '#9EC5E0	', '#7E9FCC'];
+
     for (var i = 0; i < scoresNow.length; i++) {
       var onderdeelArr = [];
       onderdeelArr.push(scoresNow[i].onderdeel);
       if (scoresWas !== undefined) {
         var cijferWas = (Math.round(100 * (scoresWas[i].totaalScore / scoresWas[i].maxScore))) / 10;
         onderdeelArr.push(cijferWas);
-        onderdeelArr.push('color:' + colors[i] + '; opacity:0.5');
+        onderdeelArr.push('color:' + colorsWas[i]);
       }
       var cijfer = (Math.round(100 * (scoresNow[i].totaalScore / scoresNow[i].maxScore))) / 10;
       onderdeelArr.push(cijfer);
@@ -31,12 +38,12 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
       chartData.push(onderdeelArr);
     }
 
-    console.log(chartData);
+    //console.log(chartData);
     return chartData;
   }
 
   // Set paddings based on screen size
-  $scope.chartClass = window.innerWidth > 800 ? 'chart' : 'chart2';
+  $scope.chartClass = window.innerWidth > 700 ? 'chart' : 'chart2';
   // Google charts
   google.charts.load("current", {packages:['corechart']});
   //google.charts.load("current", {packages:['bar']});
@@ -54,7 +61,7 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
     }
 
     google.charts.setOnLoadCallback(drawChart);
-    var width = window.innerWidth > 800 ? 0.8 * 800 : 0.92 * window.innerWidth;
+    var width = window.innerWidth > 700 ? 0.8 * 700 : 0.92 * window.innerWidth;
     var optionsGc = {
       width: width,
       height: 500,
@@ -68,8 +75,8 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
       },
       legend: { position: "none" },
       hAxis: {
-        //slantedText: true,
-        //slantedTextAngle: 20,
+        slantedText: true,
+        slantedTextAngle: 15,
         textStyle: {fontSize: 14}
       }
     };
@@ -82,17 +89,13 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
       else if (scores[i].onderdeel == 'competentie') var sCScore = scores[i].totaalScore / scores[i].maxScore;
       else if (scores[i].onderdeel == 'locus_of_control') var locScore = scores[i].totaalScore / scores[i].maxScore;
     }
-    if (sCScore <= 0.25 && sBScore <= 0.25) var assessment = 's1';
-    else if (sCScore <= 0.25 && sBScore > 0.25 && sBScore <= 0.5) var assessment = 's2';
-    else if (sCScore <= 0.25 && sBScore > 0.5 && sBScore <= 0.75) var assessment = 's3';
-    else if (sCScore <= 0.25 && sBScore > 0.75) var assessment = 's4';
-    else if (sCScore > 0.25 && sCScore <= 0.5 && sBScore <= 0.25) var assessment = 's5';
-    else if (sCScore > 0.25 && sCScore <= 0.5 && sBScore > 0.25 && sBScore <= 0.5) var assessment = 's6';
-    else if (sCScore > 0.25 && sCScore <= 0.5 && sBScore > 0.5 && sBScore <= 0.75) var assessment = 's7';
-    else if (sCScore > 0.25 && sCScore <= 0.5 && sBScore > 0.75) var assessment = 's8';
-    else if (sBScore <= 0.5) var assessment = 's9';
-    else if (sBScore > 0.5) var assessment = 's10';
-    var loc = locScore < 0.33 ? 'extern' : (locScore < 0.67 ? 'middelmatig' : 'intern');
+    if (sCScore <= 0.33 && sBScore <= 0.5) var assessment = 's1';
+    else if (sCScore <= 0.33 && sBScore > 0.5) var assessment = 's2';
+    else if (sCScore <= 0.67 && sBScore <= 0.5) var assessment = 's3';
+    else if (sCScore <= 0.67 && sBScore > 0.5) var assessment = 's4';
+    else if (sCScore > 0.67 && sBScore <= 0.5) var assessment = 's5';
+    else if (sCScore > 0.67 && sBScore > 0.5) var assessment = 's6';
+    var loc = locScore < 0.5 ? 'extern' : 'intern';
     return {
       hunchblend: assessment,
       loc: loc
@@ -103,9 +106,25 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
   if (prevTrajectStr !== undefined) $scope.switchdisplay = true;
   $scope.switchType = ['compare', 'Vergelijk met voorgaande periode'];
 
+
   // Start core of page: first for role leidinggevende
   if (urlRole == 'leidinggevende'){
-    var responsesPromise = Functions.getResponsesPerFuncUser($scope.user, 'functionering');
+
+    // Get real name of werknemer
+    if (Store.getResults().slavedata !== undefined) {
+      var slavedata = Store.getResults().slavedata;
+      slavedata = slavedata[Object.keys(slavedata)[0]];
+      $scope.werknemer = slavedata.naam !== undefined ? slavedata.naam : slavedata.email;
+    }
+    else {
+      firebase.database().ref('klanten').orderByChild("username").equalTo(user).once("value", function(snapshot) {
+        slavedata = snapshot.val()[Object.keys(snapshot.val())[0]];
+        $scope.werknemer = slavedata.naam !== undefined ? slavedata.naam : slavedata.email;
+      });
+    }
+
+    // Get data of werknemer (and ofcourse own data)
+    var responsesPromise = Functions.getResponsesPerFuncUser(user, 'functionering');
     responsesPromise.data.then(function(snapshot) {
       document.getElementById('spinner').style.display = 'none';
       $scope.chartloadeddisplay = true;
@@ -131,16 +150,18 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
         var responsesSelf = snapshot.val()[trajectStr].test.leidinggevende;
         var scoresSelf = Functions.getFuncScores(responsesSelf);
       }
-      console.log(scoresSelf);
-      console.log(scoresSelfWas);
+      //console.log(scoresSelf);
+      //console.log(scoresSelfWas);
       googleCharts(scoresSelf, 'self');
 
       // Get the scores and chart of werknemer
       var responsesSlave = snapshot.val()[trajectStr].test.werknemer;
       var scoresSlave = Functions.getFuncScores(responsesSlave);
+      console.log(scoresSlave);
       var responsesSlaveWas = prevTrajectStr == undefined ? undefined : snapshot.val()[prevTrajectStr].test.werknemer;
       var scoresSlaveWas = prevTrajectStr == undefined ? undefined : Functions.getFuncScores(responsesSlaveWas);
-      googleCharts(scoresSlave, 'slave');
+      if (scoresSlave.length > 0) googleCharts(scoresSlave, 'slave');
+      else $scope.noresultsdisplay = true;
 
       // Switch graph view
       $scope.switchView = function(type){
@@ -166,21 +187,19 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
         if (role == 'leidinggevende') $scope.showmorebossdisplay = true;
         var shBossIndex = getStarskyHutchLoc(scoresSelf).hunchblend;
         var shSlaveIndex = getStarskyHutchLoc(scoresSlave).hunchblend;
-        $scope.locBossIndex = getStarskyHutchLoc(scoresSelf).loc;
-        $scope.locSlaveIndex = getStarskyHutchLoc(scoresSlave).loc;
+        var locBossIndex = getStarskyHutchLoc(scoresSelf).loc;
+        var locSlaveIndex = getStarskyHutchLoc(scoresSlave).loc;
 
         QuestionsNew.then(function(questions){
           $scope.$apply(function(){
-            $scope.shBoss = questions.profile.functionering[shBossIndex];
-            $scope.shSlave = questions.profile.functionering[shSlaveIndex];
-            $scope.locBoss = questions.profile.functionering.loc[$scope.locBossIndex];
-            $scope.locSlave = questions.profile.functionering.loc[$scope.locSlaveIndex];
+            $scope.shBoss = questions.profile.functionering[shBossIndex][locBossIndex];
+            $scope.shSlave = questions.profile.functionering[shSlaveIndex][locSlaveIndex];
           });
         });
       }
     });
 
-    var persoonlijkheidsPromise = Functions.getResponsesPerFuncUser($scope.user, 'personality');
+    var persoonlijkheidsPromise = Functions.getResponsesPerFuncUser(user, 'personality');
     Promise.all([QuestionsNew, persoonlijkheidsPromise.data]).then(function(data) {
       var responses = data[1].val();
       var traits = data[0].profile.functionering_persoonlijkheid;
@@ -189,7 +208,7 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
         if (responses.shared){
           $scope.personality = {};
           var scores = Functions.getPersScores(responses, traits, 'func');
-          console.log(scores);
+          //console.log(scores);
           for (onderdeel in scores){
             if (scores[onderdeel].traitBoss !== undefined) $scope.personality[onderdeel] = scores[onderdeel];
           }
@@ -254,7 +273,7 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
     }
 
     // Share personality with leidinggevende
-    var persoonlijkheidsPromise = Functions.getResponsesPerFuncUser($scope.user, 'personality');
+    var persoonlijkheidsPromise = Functions.getResponsesPerFuncUser(user, 'personality');
     persoonlijkheidsPromise.data.then(function(data) {
       $scope.nosharedisplay = !data.val().shared;
     });
@@ -270,5 +289,14 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
     $scope.showmoredisplay = false;
     if (urlRole == 'leidinggevende') $scope.bossdisplay = true;
     else $scope.personalitydisplay = true;
+  }
+
+  $scope.menuNav = function(tab){
+    var role = $routeParams.role !== undefined ? $routeParams.role : funcData.role;
+    var werknemer = $routeParams.user !== undefined ? $routeParams.user : funcData.werknemer;
+    var fid = $routeParams.fid !== undefined ? $routeParams.fid : (funcData !== undefined ? funcData.trajectnr : '');
+    if (tab == 'home') $location.path('functioneringstest');
+    else if (tab == 'agreements') $location.path('functioneringsafspraken/' + role + '/view/' + werknemer + '/' + fid);
+    else if (tab == 'archive') $location.path('functioneringsarchief/' + role + '/' + werknemer);
   }
 }

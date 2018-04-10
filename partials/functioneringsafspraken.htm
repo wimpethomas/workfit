@@ -28,6 +28,10 @@
     <p ng-if="answer != undefined">{{ answer }}. Dit is verstuurd naar je leidinggevende.</p>
     <p ng-if="answerSlave != undefined">{{ answerSlave }}</p>
     <p><button ng-if="pasaan" ng-click="toEditView()" class="btn btn-blue" data-page="functioneringsafspraken" data-sub="editpagina" data-type="button">Pas afspraken aan</button></p>
+    <p ng-if="ontwikkeling">De afspraken zijn mogelijk aanleiding om een ontwikkeltraject te starten. Is dat het geval, ga dan verder.
+      Je kunt in onderstaande dropdown een specifiek gebied kiezen, wat je met ke leidinggevende hebt afghesproken te ontwikkelen. In dat geval krijg je een vooringevuld traject op maat, dat je alleen naar wens hoeft aan te passen.</p>
+    <p ng-if="ontwikkeling" ng-dropdown-multiselect="" options="gebieddata" selected-model="gebiedmodel" extra-settings="gebiedsettings" translation-texts="gebiedcustomTexts" events="gebiedevent"></p>
+    <p><button ng-if="ontwikkeling" ng-click="startOntwikkeling(gebiedselected)" class="btn btn-red" data-page="functioneringsafspraken" data-sub="ontwikkeling" data-type="button">Start ontwikkeltraject</button></p>
   </div>
   <!-- End View display of agreements -->
 
@@ -46,4 +50,6 @@
     </form>
   </div>
   <!-- End Edit display of agreements -->
+
+  <ng-include src="'partials/functioneringsmenu.htm'"></ng-include>
 </div>

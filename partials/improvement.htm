@@ -57,7 +57,7 @@
   <!-- Reminder step done -->
   <div ng-show="reminderdonedisplay" class="notify">
     <p>Heeft u stap {{ stepDone }} uitgevoerd?
-      <br>(Stap {{ stepDone }}: {{ stepTxt }})</p>
+      <br>(Stap {{ stepDone }}: <span ng-bind-html="stepTxt">{{ stepTxt }}</span>)</p>
     <div class="buttoncent">
       <button ng-click="reminderDone(stepDone, 'n')" class="btn btn-red btnminwidth spacer" data-page="ontwikkeling" data-sub="done-reminder" data-type="button">Nee</button>
       <button ng-click="reminderDone(stepDone+1, 'y')" class="btn btn-blue btnminwidth spacer" data-page="ontwikkeling" data-sub="done-reminder" data-type="button">Ja</button>
@@ -81,13 +81,17 @@
   <!-- End Reminder finish traject -->
 
   <!-- Reminder step set -->
-  <div ng-show="setreminderdisplay" class="notify">
+  <div ng-show="setreminderdisplay" class="notify" ng-class="{fadeOutIn: fadeOutIn}">
     <p>Geef aan hoeveel dagen je {{ extra }} nodig hebt voor het uitvoeren van stap {{ stepNext }}
-      <br><span ng-if="stepNext !== 1">(Stap {{ stepNext }}: {{ stepNTxt }})</span>
+      <br><span ng-if="stepNext !== 1">(Stap {{ stepNext }}: <span ng-bind-html="stepNTxt">{{ stepNTxt }}</span>)</span>
     </p>
-    <form ng-submit="setReminder(stepNext, type)" class="buttoncent">
+    <p ng-if="type == 'y'">Of sla over als je de stap direct uitvoert en wilt doorgaan naar de volgende stap.</p>
+    <form ng-submit="setReminder(stepNext, type, false)" class="buttoncent">
       <input type="number" ng-model="notification" placeholder="Aantal dagen" class="btninput rspace" width="60" required>
       <input type="submit" value="Verzend" class="btn btn-red" data-page="ontwikkeling" data-sub="aanmaken-reminder" data-type="button">
+    </form>
+    <form ng-submit="setReminder(stepNext, type, true)" class="buttoncent" ng-if="type == 'y'">
+      <input type="submit" value="Sla over" class="btn btn-blue" data-page="ontwikkeling" data-sub="overslaan-reminder" data-type="button">
     </form>
   </div>
   <!-- End Reminder set -->

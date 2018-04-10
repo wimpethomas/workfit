@@ -2,6 +2,119 @@ angular.module('workfit').controller('TestController', TestCtrl);
 
 function TestCtrl($scope, QuestionsNew, ResponsesPerUser) {
 
+  function sendInvitationEmail(bedrijf) {
+    var baseUrl = 'https://www.workfit-pmo.nl/#!/';
+    var promises = [];
+    var data = [];
+    var promises = [];
+
+    firebase.database().ref('klanten').orderByChild('bedrijf').equalTo(bedrijf).once('value').then(function(snapshot) {
+      snapshot.forEach(function(childSnap) {
+        var email = childSnap.val().email;
+        var name = childSnap.val().naam;
+        var obj = {name: name, email: email};
+        data.push(obj);
+      })
+      return data;
+    }).then(function(data){
+      //console.log(data);
+      var subject = 'Uitnodiging WorkFit-app';
+      var body = '<p>Bij deze nodigen we je uit voor de WorkFit-app. De app helpt - op een leuke en laagdrempelige manier - mee je gezond en prettig op je werk te blijven voelen.<br>Je kunt je registreren voor de app op <a href="https://www.workfit-pmo.nl">workfit-pmo.nl</a>.</p>';
+      body += '<p>De app is er op gericht te achterhalen op welke gebieden je goed functioneert en op welke gebieden minder. Constateren we dat je op een bepaald gebied achterblijft, dan zoomen we op dat gebied in en kijken we wat precies de oorzaken zijn. Dit alles doen we aan de hand van korte vragenlijsten. Bij opstarten via een eenmalige nulmeting, vervolgens via een paar korte vragen waar je periodiek een melding voor krijgt. Die periode is de eerste maand iedere week, blijkt dan alles goed te gaan dan krijg je nog maar eens per drie weken een melding voor de vragenlijst.<br>';
+      body += 'Als we na het inzoomen op een gebied zien waardoor je voor dat gebied minder scoort, dan bieden we je een zo goed als kant-en-klaar traject aan om je op dit gebied te ontwikkelen. Het is uiteraard aan jou of je hier ook daadwerkelijk iets mee wilt doen.</p>';
+      body += '<p>Tot slot, als je je hebt geregistreerd vraagt de app om notificaties toe te staan. We raden je dit aan te doen, zodat je op een eenvoudige manier - direct op je smartphone - meldingen vanuit de app kunt ontvangen.</p>';
+      body += '<p>Veel plezier met het gebruik van WorkFit!</p>';
+      body += '<p>Het WorkFit team</p>';
+      for (var i = 0; i < data.length; i++) {
+        var header = '<p>Beste ' + data[i].name + '</p>';
+        var to = data[i].email;
+        var mailOptions = {
+          from : 'WorkFit <noreply@workfit.nl>',
+          to: to,
+          subject: subject,
+          html: header + body
+        };
+        promises.push(mailOptions);
+      }
+      console.log(promises);
+    });
+  }
+  sendInvitationEmail('WorkFit')
+
+
+  /*
+  var setWfDate = function(type, days) {
+    var datum = new Date();
+    if (type == 'notification') {
+      datum.setDate(datum.getDate() + days);
+      return datum.toISOString().split('T')[0];
+    } else return datum.toISOString();
+  };
+  var gebieden = ['competentie', 'sociale_steun', 'zelfstandigheid', 'vermoeidheid', 'werkdruk', 'gezondheid', 'fysieke_gezondheid'];
+
+  function updateNotificationDates(){
+    var yesterday = setWfDate('notification', -1);
+    var nextWeek = setWfDate('notification', 7);
+    firebase.database().ref('notifications').orderByChild('datum').endAt(yesterday).once('value').then(function(snapshot) {
+      snapshot.forEach(function(childSnap) {
+        var user = childSnap.key;
+        firebase.database().ref('notifications/' + user + '/datum').set(nextWeek);
+        firebase.database().ref('notifications/' + user + '/messageType').set('weekly');
+      });
+    });
+  }
+  updateNotificationDates();
+
+  function updateAverageGrades(){
+    var now = new Date();
+    var today = setWfDate('notification', 0);
+    var lastWeek = setWfDate('notification', -7);
+
+    var NulmetingResponses = firebase.database().ref('responses').orderByChild('nulmeting/datum').startAt(lastWeek).endAt(today).once('value');
+    var ExistingGradeData = firebase.database().ref('questions/settings/averages/nulmeting').once('value');
+
+    Promise.all([NulmetingResponses, ExistingGradeData]).then(function(snapshot) {
+      console.log(snapshot[0].val());
+      var numberOfUsers = 0;
+      var grades = {};
+      grades[gebieden[0]] = grades[gebieden[1]] = grades[gebieden[2]] = grades[gebieden[3]] = grades[gebieden[4]] = grades[gebieden[5]] = grades[gebieden[6]] = 0;
+      snapshot[0].forEach(function(childSnap) {
+        var userData = childSnap.val();
+        if (userData.nulmeting.status == 'closed'){
+          numberOfUsers += 1;
+          //var grades = {};
+          for (var i = 0; i < gebieden.length; i++){
+            var vals = userData.nulmeting[gebieden[i]];
+            var sum = 0;
+            for (val in vals){
+              sum += parseInt(vals[val]);
+            }
+            var grade = 10 * sum / (Object.keys(vals).length * 3);
+            grades[gebieden[i]] += grade;
+          }
+        }
+      });
+      var gradesData = {numberOfUsers: numberOfUsers, grades: grades};
+
+      const existing = snapshot[1].val();
+      var newGrades = {nrofusers: existing.nrofusers + gradesData.numberOfUsers};
+      for (var i = 0; i < gebieden.length; i++){
+        var existingTotal = existing[gebieden[i]] * existing.nrofusers;
+        var toAddTotal = gradesData.grades[gebieden[i]];
+        var newTotal = existingTotal + toAddTotal;
+        var newGrade = newTotal / newGrades.nrofusers;
+        newGrades[gebieden[i]] = Math.round(newGrade * 10) / 10;
+      }
+      console.log(newGrades);
+
+      firebase.database().ref().child('questions/settings/averages/nulmeting').remove();
+      firebase.database().ref().child('questions/settings/averages/nulmeting').set(newGrades);
+    });
+  }
+  //updateAverageGrades();
+
+
+  // TESTSCRIPT VOOR OPVRAGEN VAN DEVICEIDS (CLOUD FUNCTION TEST OBV URL ENDPOINT) EN VOOR FUNCNOTIFICATION
   function sendFuncNotification(){
     console.log('test');
     const getDeviceTokensPromise = firebase.database().ref('/notifications/kwek_duck_nl/deviceId').once('value');
@@ -15,16 +128,9 @@ function TestCtrl($scope, QuestionsNew, ResponsesPerUser) {
       console.log(tokensSnapshot.val());
     });
   }
-  sendFuncNotification()
-
-
-
-
-
-
-  // TESTSCRIPT VOOR OPVRAGEN VAN DEVICEIDS (CLOUD FUNCTION TEST OBV URL ENDPOINT)
-  sendNotifications();
-  sendEmails();
+  //sendFuncNotification();
+  //sendNotifications();
+  //sendEmails();
 
   function setup(type) {
     var now = new Date();
@@ -87,7 +193,6 @@ function TestCtrl($scope, QuestionsNew, ResponsesPerUser) {
         } else if (deviceId == undefined) {
           var email = childSnap.val().email;
           dataEmails[messageType].push(email);
-
         }
       });
       return {
@@ -195,7 +300,6 @@ function TestCtrl($scope, QuestionsNew, ResponsesPerUser) {
         data: data
       }
     }).then(function(defdata) {
-      /*
                 var mTypes = defdata.mTypes;
                 var response = [{
                         "results": [{
@@ -295,8 +399,8 @@ function TestCtrl($scope, QuestionsNew, ResponsesPerUser) {
                         "multicastId": 8705752488256362000
                     }
                 ];
-                */
 
     });
   }
+  */
 }

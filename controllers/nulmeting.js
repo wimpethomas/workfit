@@ -1,12 +1,13 @@
 angular.module('workfit')
 .controller('NullController', NullCtrl);
 
-function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPerUser, ResponseOptions, Store, AllowNotifications, Gebieden, Functions) {
+function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPerUser, UserData, ResponseOptions, Store, AllowNotifications, Gebieden, Functions) {
   $scope.questions = [];
+  var now = new Date();
   var nowString = Functions.setWfDate();
   // Set notification date for nulmeting reminder on days + 3 (in test 1) and weekly updates on days +7 (in test 3)
-  var datumRemString = Functions.setWfDate('notification', 1);
-  var datumWeekString = Functions.setWfDate('notification', 3);
+  var datumRemString = Functions.setWfDate('notification', 3);
+  var datumWeekString = Functions.setWfDate('notification', 7);
 
   Promise.all([QuestionsNew, ResponsesPerUser]).then(function(data) {
     // First load questions and - if they are there - responses
@@ -16,11 +17,13 @@ function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPer
     var email = data[1].email;
     Store.setResults('username', username);
     // Check on notifications: allow/block and set in database
-    AllowNotifications.notify(username, email);
+    var notifyAllowed = AllowNotifications.notify(username, email);
+    console.log(notifyAllowed);
+
     data[1].responses.then(function(responses) {
       document.getElementById('spinner').style.display = 'none';
-      var responses = responses.nulmeting;
-      var status = responses !== undefined ? responses.status : undefined;
+      var responsesNul = responses.nulmeting;
+      var status = responsesNul !== undefined ? responsesNul.status : undefined;
       var isStarter = status == 'closed' ? false : true;
       if (!isStarter) evaluate(undefined, undefined, isStarter);
       else {
@@ -42,19 +45,19 @@ function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPer
         $scope.questionsLength = $scope.questions.length;
 
         // And display the right question. If new user first question is displayed
-        if (responses == null) $scope.welcomedisplay = true;
+        if (responsesNul == null) $scope.welcomedisplay = true;
         else {
           // Count which questions are already answered
           var count = 0;
-          for (var gebied in responses) {
+          for (var gebied in responsesNul) {
             if (Gebieden.gebieden.indexOf(gebied) !== -1) { // It has to be a gebied, not status or datum
-              for (var response in responses[gebied]) {
+              for (var response in responsesNul[gebied]) {
                 count = count + 1;
               }
             }
           }
           // Evaluate when all questions are answered. Else show first unanswered question
-          if (count == $scope.questions.length) evaluate(username, responses, isStarter);
+          if (count == $scope.questions.length) evaluate(username, responsesNul, isStarter);
           else $scope.existingdisplay = true;
         }
 
@@ -100,10 +103,8 @@ function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPer
               evaluate(username, responses.nulmeting, isStarter);
             });
           }
-          // Set a checked mark when question is answered - with timeout because of 0,5 second animation
-          setTimeout(function() {
-            $scope.checkedquestion[nr] = true;
-          }, 500);
+          // Set a checked mark when question is answered
+          $scope.checkedquestion[nr] = true;
         }
 
         $scope.prevQuestion = function(nr) {
@@ -115,19 +116,50 @@ function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPer
           $scope.questions[nr + 1].display = true;
         }
       }
+
+      // Check if bell icon must be set in case of tiles display
+      // Weekly check
+      var weekly = responses.weekly;
+      if (weekly !== undefined) {
+        var nrOfWeeks = Object.keys(weekly).length;
+        var weekStr = 'week-' + nrOfWeeks;
+        var dateLastW = weekly[weekStr].datum;
+        var datumL = Date.parse(dateLastW);
+        var timeDiff = Math.abs(now.getTime() - datumL);
+        var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        if (diffDays > 6) $scope.weeklynot = true;
+      }
+      else $scope.weeklynot = true;
+
+      // Ontwikkeltraject
+      var ontwikkel = responses.advies;
+      if (ontwikkel !== undefined) {
+        var lastOntwikkel = Functions.lastUnfinishedResult(ontwikkel);
+        if (lastOntwikkel !== undefined) $scope.ontwikkelnot = true;
+      }
+
+      // Functionering
+      UserData.then(function(userdata){
+        var roles = userdata.type;
+        if (roles.indexOf('werknemer') > -1 || roles.indexOf('leidinggevende') > -1) {
+          $scope.$apply(function(){
+            $scope.functile = true;
+            var functionering = responses.functionering;
+            if (functionering !== undefined) {
+              var nrOfTrajects = Object.keys(functionering).length;
+              var trajectStr = 'traject-' + nrOfTrajects;
+              var isActive = functionering[trajectStr].status == 'active' ? true : false;
+              if (isActive) $scope.funcnot = true;
+            }
+          })
+        }
+      })
     });
   });
 
-  $scope.skipNulmeting = function() {
-    $location.path('/profiel');
-  }
-
-  $scope.getUitleg = function() {
-    $location.path('/advies/uitleg');
-  }
-
-  $scope.getVerbetertraject = function() {
-    $location.path('/verbetertraject');
+  $scope.getPath = function(path, type, link) {
+    type = type ? type : '';
+    if (link) $location.path('/' + path + '/' + type);
   }
 
   function evaluate(username, responses, isStarter) {
@@ -192,6 +224,7 @@ function NullCtrl($scope, $location, $firebaseObject, QuestionsNew, ResponsesPer
         // Redirect to test page
         $location.path('/tests');
       }
-    } else $scope.againdisplay = true;
+    }
+    else $scope.againdisplay = true;
   }
 }

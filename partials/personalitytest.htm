@@ -1,5 +1,5 @@
 <div id="content">
-  <div class="notify" ng-show="startfromflowdisplay">
+  <div class="notify" ng-if="startfromflowdisplay && !questionsdisplay">
     <p>Om een advies op maat te kunnen geven moeten we meer over je persoonlijkheid weten. Klik op onderstaande knop om de persoonlijkheidstest te beginnen.</p>
     <p>De test bestaat uit 40 vragen en is eenmalig. Heb je nu geen zin of tijd om deze in te vullen, doe de test dan op een ander moment. Maar pas als je de test hebt gedaan krijg je een beter beeld van je problemen en een startpunt voor een ontwikkelingstraject.</p>
     <form ng-submit="startPersonality('new')" class="buttoncent">
@@ -7,14 +7,14 @@
     </form>
   </div>
 
-  <div class="notify" ng-show="existingdisplay">
+  <div class="notify" ng-if="existingdisplay && !questionsdisplay">
     <p>Je hebt de persoonlijkheidstest nog niet afgerond.</p>
     <form ng-submit="startPersonality('existing')" class="buttoncent">
       <input class="btn btn-red" type="submit" value="Maak de pesroonlijkheidstest af" data-page="persoonlijkheidstest" data-sub="finish" data-type="button">
     </form>
   </div>
 
-  <div class="notify" ng-show="againdisplay">
+  <div class="notify" ng-if="againdisplay && !questionsdisplay">
     <p>Je hebt de persoonlijkheidstest al afgerond.
     <form ng-submit="getResults()" class="buttoncent">
       <input class="btn btn-blue" type="submit" value="Resultaten test" data-page="persoonlijkheidstest" data-sub="afgerond" data-type="button">
@@ -22,7 +22,7 @@
   </div>
 
   <div ng-show="questionsdisplay" class="questions">
-    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
       <div class="progressbar">
         <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="persoonlijkheidstest" data-sub="test" data-type="button-small">Terug</button>
         <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="persoonlijkheidstest" data-sub="test" data-type="button-small">Volgende</button>

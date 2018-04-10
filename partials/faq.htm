@@ -1,8 +1,10 @@
-<div id="content">
+<div id="content" class="extra extratop">
+  <div class="result2" ng-if="faqs">&nbsp;</div>
   <div ng-repeat="faq in faqs" class="result2 buttoncent">
     <span ng-click="show = !show" data-page="faq" data-type="textlink">{{ faq.q }}</span>
     <img src="assets/arrow-down.png" width="20" ng-click="show = !show" ng-show="!show" style="margin-left: 20px" data-page="faq" data-type="imagelink">
     <img src="assets/arrow_up.png" width="20" ng-click="show = !show" ng-show="show" style="margin-left: 20px" data-page="faq" data-type="imagelink">
-    <li class="box" ng-show="show">{{ faq.a }}</li>
+    <li class="box" ng-show="show" ng-bind-html="faq.a">{{ faq.a }}</li>
   </div>
+  <div class="result2" ng-if="faqs">&nbsp;</div>
 </div>

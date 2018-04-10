@@ -4,10 +4,10 @@
     <p><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="norights" data-type="button">Terug</button></p>
   </div>
 
-  <div class="notify" ng-if="chooseroleddisplay">
+  <div class="notify" ng-if="chooseroledisplay">
     <p>Je hebt de rollen leidinggevende en werknemer in je account; je dient dus zowel functioneringsgesprekken af te nemen (in je rol als leidinggevende) als te volgen (in je rol als werknemer).<br>
       Kies één van deze twee rollen om verder te gaan.</p>
-    <p><button ng-click="chooseRole('boss')" class="btn btn-blue" data-page="functionering-test" data-sub="kiesrol" data-type="button">Leidingevende</button></p>
+    <p><button ng-click="chooseRole('boss')" class="btn btn-blue" data-page="functionering-test" data-sub="kiesrol" data-type="button">Leidinggevende</button></p>
     <p><button ng-click="chooseRole('slave')" class="btn btn-blue" data-page="functionering-test" data-sub="kiesrol" data-type="button">Werknemer</button></p>
   </div>
 
@@ -103,7 +103,7 @@
   </div>
 
   <div ng-show="questionsdisplay" class="questions">
-    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
       <div class="progressbar">
         <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="functionering-test" data-sub="test" data-type="button-small">Terug</button>
         <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="functionering-test" data-sub="test" data-type="button-small">Volgende</button>
@@ -119,10 +119,5 @@
     </div>
   </div>
 
-  <div class="navlinks">
-      <button ng-click="getOverview()" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Overzicht</button>
-      <button ng-click="startTest()" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Resultaten</button>
-      <button ng-click="viewAgreements(role)" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Afspraken</button>
-      <button ng-click="getFuncArchive(role, slaveddmodel[0])" class="btn btnwidth" data-page="functionering-test" data-sub="navlink" data-type="button">Archief</button>
-  </div>
+  <ng-include src="'partials/functioneringsmenu.htm'"></ng-include>
 </div>

@@ -1,13 +1,14 @@
 <div id="content">
-  <div class="notify" ng-show="welcomedisplay">
+  <!--
+  <div class="notify" ng-if="welcomedisplay">
     <p>Welkom bij de Workfit app, de app die ervoor zorgt dat je gezond en gelukkig bent en blijft op je werk.
       <br>De app is anoniem, gegevens die je invult zijn alleen voor jezelf inzichtelijk.</p>
     <div class="buttoncent">
       <form ng-submit="getUitleg()" class="buttoninline">
-        <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit" data-page="nulmeting" data-sub="welkom" data-type="button">
+        <input class="btn spacer" type="submit" value="Toelichting WorkFit" data-page="nulmeting" data-sub="welkom" data-type="button">
       </form>
       <form ng-submit="startNulmeting('new')" class="buttoninline">
-        <input class="btn btn-blue spacer" type="submit" value="Begin nulmeting" data-page="nulmeting" data-sub="welcome" data-type="button">
+        <input class="btn btn-red spacer" type="submit" value="Begin nulmeting" data-page="nulmeting" data-sub="welkom" data-type="button">
       </form>
     </div>
   </div>
@@ -18,38 +19,71 @@
       <input class="btn btn-red" type="submit" value="Maak nulmeting af" data-page="nulmeting" data-sub="finish" data-type="button">
     </form>
   </div>
+-->
 
   <div class="notify" ng-show="resultdisplay">
     <p>Mooi! Je scoort voldoende op alle gezondheidsgebieden. Klik onderstaand om de resultaten te zien.</p>
-    <form ng-submit="skipNulmeting()" class="buttoncent">
+    <form ng-submit="getPath('profiel', 'nulmeting', true)" class="buttoncent">
       <input class="btn btn-blue" type="submit" value="Resultaten nulmeting" data-page="nulmeting" data-sub="nouitval" data-type="button">
     </form>
   </div>
 
-  <div class="notify" ng-show="againdisplay">
-    <p>Ga verder met een van onderstaande onderdelen.
-      <!-- Wil je de nulmeting nogmaals doorlopen?</p>
-<p>(Resultaten worden overschreven.) --></p>
-    <div class="buttoncent">
-      <form ng-submit="getUitleg()" class="buttoninline">
-        <input class="btn btn-green spacer" type="submit" value="Toelichting WorkFit" data-page="nulmeting" data-sub="afgerond" data-type="button">
-      </form>
-      <form ng-submit="skipNulmeting()" class="buttoninline">
-        <input class="btn btn-blue spacer" type="submit" value="Profiel" data-page="nulmeting" data-sub="afgerond" data-type="button">
-      </form>
-      <form ng-submit="getVerbetertraject()" class="buttoninline">
-        <input class="btn btn-blue spacer" type="submit" value="Ontwikkelingstraject" data-page="nulmeting" data-sub="afgerond" data-type="button">
-      </form>
+  <div class="notify" ng-show="welcomedisplay || existingdisplay || againdisplay">
+    <span ng-if="welcomedisplay">Welkom bij de Workfit app, de app die ervoor zorgt dat je gezond en gelukkig bent en blijft op je werk.<br>De app is anoniem, gegevens die je invult zijn alleen voor jezelf inzichtelijk.</span>
+    <span ng-if="existingdisplay">Je hebt de nulmeting nog niet afgerond.</span>
+    <span ng-if="againdisplay">Ga verder met een van onderstaande onderdelen.</span>
+    <div>&nbsp;</div>
+    <div class="tiles-grid">
+      <div data-role="tile" class="tile-medium" ng-click="getPath('advies', 'uitleg', true)" data-page="nulmeting" data-sub="afgerond" data-type="tile">
+        <span class="mif-info icon"></span>
+        <span class="branding-bar">Toelichting WorkFit</span>
+      </div>
+      <div data-role="tile" class="tile-medium bg-red" ng-click="startNulmeting('new')" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-if="welcomedisplay">
+        <span class="mif-meter icon"></span>
+        <span class="branding-bar">Begin nulmeting</span>
+        <span class="badge-top mif-bell"></span>
+      </div>
+      <div data-role="tile" class="tile-medium bg-red" ng-click="startNulmeting('existing')" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-if="existingdisplay">
+        <span class="mif-meter icon"></span>
+        <span class="branding-bar">Maak nulmeting af</span>
+        <span class="badge-top mif-bell"></span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('weekly', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-red': weeklynot, 'bg-tint': !againdisplay}">
+        <span class="mif-alarm icon"></span>
+        <span class="branding-bar">Wekelijkse check</span>
+        <span class="badge-top" ng-class="{'mif-bell': weeklynot}"></span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('profiel', 'nulmeting', againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-tint': !againdisplay}">
+        <span class="mif-chart-bars icon"></span>
+        <span class="branding-bar">Resultaten nulmeting</span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('profiel', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-tint': !againdisplay}">
+        <span class="mif-chart-pie icon"></span>
+        <span class="branding-bar">Profiel</span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('verbetertrajecten', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-red': ontwikkelnot, 'bg-tint': !againdisplay}">
+        <span class="mif-tools icon"></span>
+        <span class="branding-bar">Ontwikkeltrajecten</span>
+        <span class="badge-top" ng-class="{'mif-bell': ontwikkelnot}"></span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('functioneringstest', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-if="functile" ng-class="{'bg-red': funcnot, 'bg-tint': !againdisplay}">
+        <span class="mif-users icon"></span>
+        <span class="branding-bar">Functioneringsgesprek</span>
+        <span class="badge-top" ng-class="{'mif-bell': funcnot}"></span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('tests', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-tint': !againdisplay}">
+        <span class="mif-stethoscope icon"></span>
+        <span class="branding-bar">Gezondheidstesten</span>
+      </div>
+      <div data-role="tile" class="tile-medium" ng-click="getPath('personalitytest', false, againdisplay)" data-page="nulmeting" data-sub="afgerond" data-type="tile" ng-class="{'bg-tint': !againdisplay}">
+        <span class="mif-pencil icon"></span>
+        <span class="branding-bar">Persoonlijkheidstest</span>
+      </div>
     </div>
-    <!--
-<form ng-submit="startNulmeting('new')">
-<input class="btn btn-red" type="submit" value="Doe de nulmeting opnieuw">
-</form>
--->
   </div>
 
   <div ng-show="questionsdisplay" class="questions">
-    <div ng-repeat="question in questions" ng-show="question.display" class="question">
+    <div ng-repeat="question in questions" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
       <div class="progressbar">
         <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="nulmeting" data-sub="test" data-type="button-small">Terug</button>
         <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="nulmeting" data-sub="test" data-type="button-small">Volgende</button>

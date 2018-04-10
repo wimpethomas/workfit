@@ -2,11 +2,19 @@ angular.module('workfit')
 .controller('PersonalityController', PersonalityCtrl);
 
 function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPerUser, ResponseOptions, Store, Gebieden, Functions) {
-  // inFlow EN redirectType ZIJN MIN OF MEER HETZELFDE. REDUNDANTIE ERUITHALEN
-  var inFlow = $routeParams.type;
+  var storedResult = Store.getResults().resultgebied;
+  var storedTestnr = Store.getResults().testnr;
+  //console.log(storedResult, storedTestnr);
+
+  // There are 3 different types of redirectTypes:
+  // (1) 'flow' (when /personalitytest follows on uitval),
+  // (2) 'results' (when /personalitytest is called from personalityresults to check if finished and get evaluate()),
+  // (3) 'func'/'funcuser' (when /personalitytest is called from functioneringsresults (role == werknemer) to check if finished and get evaluate()),
+
+  var redirectType = $routeParams.type !== undefined ? $routeParams.type : (storedResult == undefined ? 'results' : undefined);
   var nowString = Functions.setWfDate();
   // Set notification date for nulmeting reminder on days + 3 (in test 1)
-  var datumRemString = Functions.setWfDate('notification', 1);
+  var datumRemString = Functions.setWfDate('notification', 3);
   $scope.questions = [];
 
   Promise.all([QuestionsNew, ResponsesPerUser]).then(function(data) {
@@ -20,15 +28,7 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
       // Get the personality test responses;
       var responses = responses.personality;
       var status = responses !== undefined ? responses.status : undefined;
-      var isFinished = status == 'closed' ? true : false;
-      var storedResult = Store.getResults().resultgebied;
-
-      // There are 3 different types of redirectTypes:
-      // (1) 'flow' (when /personalitytest follows on uitval),
-      // (2) 'results' (when /personalitytest is called from personalityresults to check if finished and get evaluate()),
-      // (3) 'func'/'funcuser' (when /personalitytest is called from functioneringsresults (role == werknemer) to check if finished and get evaluate()),
-
-      var redirectType = $routeParams.type !== undefined ? $routeParams.type : (storedResult == undefined ? 'results' : undefined);
+      var isFinished = status == 'closed' ? true : false
       if (isFinished) evaluate(username, responses, traitSpecs, isFinished, redirectType); // In this case test questions can be skipped
       else {
         // Define start function first, because it is a $scope function
@@ -40,8 +40,8 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
             firebase.database().ref().child('notifications/' + username + '/datum').set(datumRemString);
           }
           var index = type == 'new' ? 0 : count;
-          var notify = angular.element(document.getElementsByClassName("notify"));
-          notify.remove();
+          //var notify = angular.element(document.getElementsByClassName("notify"));
+          //notify.remove();
           $scope.questionsdisplay = true;
           $scope.questions[index].display = true;
         }
@@ -59,17 +59,18 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
         }
         $scope.questionsLength = $scope.questions.length;
         // And display the right question. If new user first question is displayed
-        if (responses == null) {
-          if (inFlow == 'flow' || inFlow == 'func' || inFlow.indexOf('funcuser') > -1) $scope.startfromflowdisplay = true;
+        if (responses == undefined) {
+          if (redirectType == 'func' || redirectType.indexOf('funcuser') > -1) $scope.startfromflowdisplay = true;
           else $scope.startPersonality('new');
         } else {
           // Count which questions are already answered
           var count = 0;
           for (var qnr in responses) {
-            if (qnr !== 'status' && qnr !== 'datum') count = count + 1;
+            if (qnr.length < 4) count = count + 1;  // excludes 'status', 'datum' and 'shared'
           }
           // Evaluate when all questions are answered. Else show first unanswered question
           if (count == $scope.questions.length) evaluate(username, responses, traitSpecs, isFinished, redirectType);
+          else if (redirectType == 'flow') $scope.startPersonality('existing');
           else $scope.existingdisplay = true;
         }
 
@@ -96,10 +97,8 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
               evaluate(username, responses.personality, traitSpecs, isFinished, redirectType);
             });
           }
-          // Set a checked mark when question is answered - with timeout because of 0,5 second animation
-          setTimeout(function() {
-            $scope.checkedquestion[nr] = true;
-          }, 500);
+          // Set a checked mark when question is answered
+          $scope.checkedquestion[nr] = true;
         };
 
         $scope.prevQuestion = function(nr) {
@@ -115,6 +114,8 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
   });
 
   function evaluate(username, responses, traits, isFinished, redirectType) {
+    //console.log(traits);
+    //console.log(responses);
     var isRedirect = redirectType == undefined ? false : true;
     if (!isFinished || isRedirect) {
       console.log('Case 1 personalitytest: Test is nog niet af (' + !isFinished + ') OF het is een redirect van results/advies (' + isRedirect + ').');
@@ -123,7 +124,8 @@ function PersonalityCtrl($scope, $location, $routeParams, QuestionsNew, Response
       if (redirectType == 'results') $location.path('/personalityresults');
       else if (redirectType == 'func') $location.path('/functioneringsresults/werknemer/');
       else if (redirectType.indexOf('funcuser') > -1) $location.path('/functioneringsresults/werknemer/' + username + '/' + redirectType.split('-')[1]);
-      else $location.path('/advies');
+      else $location.path('/verbetertrajecten/' + storedResult + '/' + storedTestnr);
+      //else $location.path('/verbetertraject');
     } else {
       console.log('Case 2 personalitytest: Test is al gedaan en het is geen redirect van results/advies.')
       $scope.againdisplay = true;

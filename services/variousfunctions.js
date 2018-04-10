@@ -2,11 +2,12 @@ angular.module('workfit')
 .service('Functions', getFunction);
 
 function getFunction(Gebieden, ResponseOptions) {
+
   var lastResultPerGebied = function(responses, gebied, type, status) {
     // Returns last started/closed/all [type] results data per gebied ordered on datum
     var dateProp = status == 'all' ? 'datum' : (status == 'started' ? 'datum_start' : 'datum_end');
-    var resultsObj = responses[gebied]; // Object on level /[type]/[gebied]
-    var latest = [undefined, 0]; // latest[0] = testName, latest[1] = dateProp
+    var resultsObj = responses !== undefined ? responses[gebied] : undefined;
+    var latest = [undefined, 0]; // latest[0] = name, latest[1] = dateProp
     var amountPerStatus = {
       pending: 0,
       unfinished: 0,
@@ -39,6 +40,34 @@ function getFunction(Gebieden, ResponseOptions) {
       };
     } else return undefined;
   };
+
+  function lastUnfinishedResult(responses) {
+    // Return charcteristics of last unfinished [type] - excluding a null-[type] (losse test)
+    var gebiedenInDB = responses == undefined ? 0 : Object.keys(responses); // Array with gebieden in db /[type]
+    var latest = [undefined, 0, undefined]; // latest[0] = [type]Str, latest[1] = datum_start, latest[2] = gebied
+    for (var i = 0; i < gebiedenInDB.length; i++) {
+      var resultsObj = responses == undefined ? undefined : responses[gebiedenInDB[i]]; // Object on level /advies/[gebied]
+      for (result in resultsObj) {
+        var dateResult = resultsObj[result].datum_start !== undefined ? Date.parse(resultsObj[result].datum_start) : 0;
+        if (dateResult > latest[1] && resultsObj[result].status == 'unfinished' && result.indexOf('null') == -1) latest = [result, dateResult, gebiedenInDB[i]]; // Only get an unfinished, no null [type]
+      }
+    }
+    if (latest[0] !== undefined) {
+      var resultStr = latest[0];
+      var resultNr = resultStr.split('-')[1];
+      if (resultNr == 'null') resultNr = null;
+      else resultNr = parseInt(resultNr);
+      var results = responses[latest[2]][latest[0]];
+      results.newadv = false;
+      return {
+        gebied: latest[2],
+        results: results,
+        resultnr: resultNr,
+        resultstr: resultStr
+      };
+    }
+    else return undefined;
+  }
 
   var metadataPerResult = function(responses, gebied, type) {
     // Returns metadata of all results in given gebied (object with metadata in array of results)
@@ -109,10 +138,6 @@ function getFunction(Gebieden, ResponseOptions) {
     return resultset;
   }
 
-  var lastUnfinishedResult = function(responses) {
-    return responses;
-  };
-
   var setWfDate = function(type, days) {
     var datum = new Date();
     if (type == 'notification') {
@@ -144,7 +169,8 @@ function getFunction(Gebieden, ResponseOptions) {
       }
     }
 
-    // Based on final real score (>0 or <0) add trait characteristics to scores object
+    // Based on final real score (>3 or <-3) add trait characteristics to scores object
+    // TODO: set low (<-3), middle (-3<x<3) and high (>3) in general settings
     for (var trait in scores) {
       scores[trait].name = Gebieden.traitsnamen[trait];
       var score = scores[trait].real;
@@ -223,6 +249,13 @@ function getFunction(Gebieden, ResponseOptions) {
     return scores;
   }
 
+  function valToKey(val, obj) {
+    for (var key in obj) {
+      if (obj[key] == val) return key;
+    }
+    return false;
+  }
+
   return {
     lastResultPerGebied: lastResultPerGebied,
     metadataPerResult: metadataPerResult,
@@ -233,6 +266,7 @@ function getFunction(Gebieden, ResponseOptions) {
     getPersScores: getPersScores,
     getResponsesPerFuncUser: getResponsesPerFuncUser,
     getFuncTrajects: getFuncTrajects,
-    getFuncScores: getFuncScores
+    getFuncScores: getFuncScores,
+    valToKey: valToKey
   };
 }

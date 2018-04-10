@@ -1,25 +1,31 @@
 <div id="content">
-  <div class="tabcontainer">
-    <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab' : isActiveTab(tab), 'func' : tab == 'functionering'}" data-page="ontwikkelingsresultaten" data-sub="tab" data-type="tab">{{ tab }}</div>
+  <div ng-if="type !== 'prefillednew'" class="tabcontainer">
+    <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab' : isActiveTab(tab), 'func' : tab == 'functionering'}" data-page="ontwikkeltraject" data-sub="tab" data-type="tab">{{ tab }}</div>
   </div>
-  <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result" ng-class="{'resultfunc' : value.name == 'functionering'}">
+
+  <div ng-if="homedisplay" ng-repeat="(key, value) in results.lastresults" ng-show="value.display" class="result" ng-class="{'resultfunc' : value.name == 'functionering'}">
     <!-- Archief -->
     <div class="detail">
       <p>Dit is je laatst ingevulde oplossing op het gebied {{ value.name }}:</p>
       <li class="box">{{ value.results.solution }}</li>
       <p>En dit het bijbehorende stappenplan:</p>
       <ul class="box">
-        <li ng-repeat="step in value.results.roadmap" class="box">Stap {{ $index + 1 }}: {{ step.step }}
-          <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: {{ step.feedback }}</span>
+        <li ng-repeat="step in value.results.roadmap" class="box">
+          Stap {{ $index + 1 }}: <span ng-bind-html="step.step">{{ step.step }}</span>
+          <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: </span><span ng-if="step.feedback" ng-bind-html="step.feedback">{{ step.feedback }}</span>
         </li>
       </ul>
       <div class="buttoncent">
         <form ng-submit="toGebiedResults(key)" class="buttoninline" ng-if="value.amountofresults > 1">
-          <input type="submit" value="Archief" class="btn btn-green spacer" data-page="ontwikkelingsresultaten" data-sub="home" data-type="button">
+          <input type="submit" value="Archief" class="btn btn-transparent spacer" data-page="ontwikkeltraject" data-sub="home" data-type="button">
         </form>
         <form ng-submit="toResult(key, undefined, 'edit', 'home')" class="buttoninline">
-          <input type="submit" value="Pas aan" class="btn btn-blue spacer" data-page="ontwikkelingsresultaten" data-sub="home" data-type="button">
+          <input type="submit" value="Pas aan" class="btn btn-red spacer" data-page="ontwikkeltraject" data-sub="home" data-type="button">
         </form>
+      </div>
+      <div ng-if="!prefilleddisplay && value.name !== 'functionering'">
+        <p>Wil je meer uitleg d.m.v. een instructiefilmpje?</p>
+        <p><button ng-click="playMovie('home')" class="btn" data-page="ontwikkeltraject" data-sub="home" data-type="button">Filmpje</button></p>
       </div>
     </div>
     <!-- End Archief -->
@@ -29,58 +35,129 @@
   <div ng-if="gebiedviewdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
     <p>Dit zijn al je ontwikkelingstrajecten op het gebied {{ gebiedsnaam }}:</p>
     <form ng-submit="toResult(gebied, metadata.resultnr)" ng-repeat="metadata in metadatas" class="buttoncent">
-      <input type="submit" value="Traject van {{ metadata.datum_start }}" class="btn btn-red" data-page="ontwikkelingsresultaten" data-sub="gebiedsoverzicht" data-type="button">
+      <input type="submit" value="Traject van {{ metadata.datum_start }}" class="btn btn-red" data-page="ontwikkeltraject" data-sub="gebiedsoverzicht" data-type="button">
       <br>
     </form>
   </div>
   <!-- End Archief per Gebied-->
 
   <!-- View display of result -->
-  <div ng-show="viewresultdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
-    <p>Dit is je ingevulde oplossing op het gebied {{ gebiedsnaam }}:
+  <div ng-if="viewresultdisplay" ng-class="{'result': type == 'detailview', 'result4': type == 'prefillednew', 'resultfunc': gebiedsnaam == 'functionering'}">
+    <p ng-if="!prefilleddisplay">Dit is je ingevulde oplossing op het gebied {{ gebiedsnaam }}:
+    <p ng-if="prefilleddisplay">Op basis van je antwoorden in gebiedstest <b>{{ gebiedsnaam }}</b> <span ng-if="personalitydisplay">en die uit de persoonlijkheidstest </span>stellen we het volgende ontwikkelingstraject voor. Specifieke details zul je waarschijnlijk nog moeten aanvullen.
       <li class="box">{{ solution }}</li>
-    <p>En dit het bijbehorende stappenplan:</p>
+    <p ng-if="!prefilleddisplay">En dit het bijbehorende stappenplan:</p>
+    <p ng-if="prefilleddisplay">Bovenstaand is de voorgestelde oplossing en onderstaand het bijbehorende stappenplan:</p>
     <ul class="box">
-      <li ng-repeat="step in roadmap" class="box">Stap {{ $index + 1 }}: {{ step.step }}
-        <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: {{ step.feedback }}</span>
+      <li ng-if="type == 'detailview'" ng-repeat="step in roadmap track by $index" class="box">
+        Stap {{ $index + 1 }}: <span ng-bind-html="step.step">{{ step.step }}</span>
+        <br><span ng-if="step.feedback">Notitie {{ $index + 1 }}: <span ng-bind-html="step.feedback">{{ step.feedback }}</span></span>
       </li>
+      <li ng-if="type == 'prefillednew'" ng-repeat="step in roadmap track by $index" class="box">Stap {{ $index + 1 }}: <span ng-bind-html="step">{{ step }}</span></li>
     </ul>
     <div class="buttoncent">
-      <form ng-submit="toGebiedResults(gebied)" class="buttoninline">
-        <input type="submit" value="Terug" class="btn btn-green spacer" data-page="ontwikkelingsresultaten" data-sub="detailpagina" data-type="button">
+      <form ng-if="type == 'detailview'" ng-submit="toGebiedResults(gebied)" class="buttoninline">
+        <input type="submit" value="Terug" class="btn btn-transparent spacer" data-page="ontwikkeltraject" data-sub="detailpagina" data-type="button">
+      </form>
+      <form ng-if="type == 'prefillednew'" ng-submit="editResult(gebied, roadmap, type)" class="buttoninline">
+        <input type="submit" value="Sla op" class="btn btn-blue spacer" data-page="ontwikkeltraject" data-sub="detailpagina" data-type="button">
       </form>
       <form ng-submit="toResult(gebied, undefined, 'edit', 'detail')" class="buttoninline">
-        <input type="submit" value="Pas aan" class="btn btn-blue spacer" data-page="ontwikkelingsresultaten" data-sub="detailpagina" data-type="button">
+        <input type="submit" value="Pas aan" class="btn btn-red spacer" data-page="ontwikkeltraject" data-sub="detailpagina" data-type="button">
       </form>
+      <form ng-if="type == 'prefillednew'" ng-submit="getHome()" class="buttoninline">
+        <input type="submit" value="Sla over" class="btn btn-transparent spacer" data-page="ontwikkeltraject" data-sub="detailpagina" data-type="button">
+      </form>
+    </div>
+    <div ng-if="!prefilleddisplay && gebiedsnaam !== 'functionering'">
+      <p>Wil je meer uitleg d.m.v. een instructiefilmpje?</p>
+      <p><button ng-click="playMovie('detail')" class="btn" data-page="ontwikkeltraject" data-sub="detailpagina" data-type="button-bottom">Filmpje</button></p>
     </div>
   </div>
   <!-- End View display of result -->
 
   <!-- Edit display of result -->
-  <div ng-show="editresultdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
+  <div ng-if="editresultdisplay" class="result" ng-class="{'resultfunc' : gebiedsnaam == 'functionering'}">
     <form class="buttoncent">
       <p>Oplossing op het gebied {{ gebiedsnaam }}:</p>
-      <textarea rows="4" ng-model="editsolution" ng-init="editsolution = solution" class="btninput btn100"></textarea>
+      <textarea rows="5" ng-model="editsolution" ng-init="editsolution = solution" class="btninput btn100" style="padding:8px;"></textarea>
       <p>En het bijbehorende stappenplan:</p>
-      <div ng-repeat="step in roadmap">Stap {{ $index + 1 }} (veld 1) en evt. feedback (veld 2):
-        <input type="text" ng-model="editroadmap[$index].step" ng-init="editroadmap = roadmap" class="btninput btn100">
+      <div ng-if="type == 'detailview'" ng-repeat="step in roadmap track by $index">Stap {{ $index + 1 }} (veld 1) en evt. feedback (veld 2):
+        <textarea rows="4" ng-model="editroadmap[$index].step" ng-init="editroadmap = roadmap" class="btninput btn100" style="padding:8px;"></textarea>
         <input type="text" ng-model="editroadmap[$index].feedback" ng-init="editroadmap = roadmap" class="btninput btn100">
       </div>
-      <div class="buttoncent buttonmarg">
-        <button ng-click="removeStep()" class="btn btn-green spacer" data-page="ontwikkelingsresultaten" data-sub="editpagina" data-type="button">Verwijder stap</button>
-        <button ng-click="addStep()" class="btn btn-green spacer" data-page="ontwikkelingsresultaten" data-sub="editpagina" data-type="button">Voeg stap toe</button>
+      <div ng-if="type == 'prefillednew'" ng-repeat="step in roadmap track by $index">Stap {{ $index + 1 }}:
+        <textarea rows="4" ng-model="editroadmap[$index]" ng-init="editroadmap = roadmap" class="btninput btn100" style="padding:8px;"></textarea>
       </div>
-      <input ng-click="editResult(gebied, roadmap)" type="submit" value="Pas aan" class="btn btn-blue" data-page="ontwikkelingsresultaten" data-sub="editpagina" data-type="button">
+      <div class="buttoncent buttonmarg">
+        <button ng-click="removeStep(type)" class="btn spacer" data-page="ontwikkeltraject" data-sub="editpagina" data-type="button">Verwijder stap</button>
+        <button ng-click="addStep(type)" class="btn spacer" data-page="ontwikkeltraject" data-sub="editpagina" data-type="button">Extra stap</button>
+      </div>
+      <input ng-click="editResult(gebied, roadmap, type)" type="submit" value="Pas aan" class="btn btn-red" data-page="ontwikkeltraject" data-sub="editpagina" data-type="button">
     </form>
   </div>
   <!-- End Edit display of result -->
 
-  <div ng-show="noadvicedisplay" class="notify">
+  <!-- Movie display -->
+  <div id="movie" ng-if="moviedisplay">
+    <div ng-if="fromtestsdisplay" class="examplecont" style="margin-top:-20px;">
+      <div class="exampletext">
+        <p>Je kunt na het filmpje een ontwikkeltraject aanmaken om te verbeteren op het gebied {{ gebied }}. Om je te helpen een beter begrip te krijgen over het traject, bekijk eerst onderstaand filmpje.</p>
+      </div>
+    </div>
+    <youtube-video video-id="ytId" player-vars="playerVars" player-width="'100%'" player-height="'400px'"></youtube-video>
+    <br>
+    <br>
+    <form ng-submit="skipMovie(page)" class="buttoncent">
+      <input type="submit" value="Sla filmpje over" class="btn btn-red" data-page="ontwikkeltraject" data-sub="filmpje" data-type="button">
+    </form>
+  </div>
+  <!-- End Movie display -->
+
+  <!-- No ontwikkeltraject -->
+  <div ng-if="nolowestdisplay" class="notify">
+    <p>Uit je gebiedstest kwamen alleen maar positieve punten naar voren. Een ontwikkeltraject op gebied {{ gebied }} is dan ook niet nodig.</p>
+    <form ng-submit="getHome()" class="buttoncent">
+      <input type="submit" value="Ga naar overzicht" class="btn btn-blue" data-page="ontwikkeltraject" data-sub="notrajecten-onlyplusses" data-type="button">
+    </form>
+  </div>
+  <!-- End No ontwikkeltraject -->
+
+  <!-- Reminder step set -->
+  <div ng-show="setreminderdisplay" class="notify" ng-init="step = 0" ng-class="{fadeOutIn: fadeOutIn}">
+    <p>Geef aan hoeveel dagen je nodig hebt voor het uitvoeren van de eerste stap uit je stappenplan
+      <br><span>(Stap {{ step + 1 }}: <span ng-bind-html="editroadmap[step]">{{ editroadmap[step] }}</span>)</span>
+    </p>
+    <p>Of sla over als je de stap direct uitvoert en wilt doorgaan naar de volgende stap.</p>
+    <form ng-submit="setReminder(notification, step, editroadmap.length)" class="buttoncent">
+      <input type="number" ng-model="notification" placeholder="Aantal dagen" class="btninput rspace" width="60" required>
+      <input type="submit" value="Verzend" class="btn btn-red" data-page="ontwikkeltraject" data-sub="aanmaken-reminder" data-type="button">
+    </form>
+    <form ng-submit="setReminder(0, step, editroadmap.length)" class="buttoncent">
+      <input type="submit" value="Sla over" class="btn btn-blue" data-page="ontwikkeltraject" data-sub="overslaan-reminder" data-type="button">
+    </form>
+  </div>
+  <!-- End Reminder set -->
+
+  <!-- Rest: roadmap sent -->
+  <div ng-if="roadmapsentdisplay" class="notify">
+    <div class="detail">
+      <p ng-if="!roadmapnulldisplay && !fallsavedisplay">Mooi! Je krijgt na {{ notification }} dagen een notificatie voor je vervolgstap</p>
+      <p ng-if="roadmapnulldisplay && !fallsavedisplay">Goed! We hebben je oplossing en stappenplan opgeslagen zodat je deze later weer kunt opvragen.</p>
+      <p ng-if="fallsavedisplay">Kennelijk heb je geen tijd nodig om je stappenplan uit te voeren. Een ontwikkeltraject is voor jou niet nodig, perfectie kun je niet verbeteren.</p>
+    </div>
+    <form ng-submit="getHome()" class="buttoncent">
+      <input type="submit" value="Ga naar overzicht" class="btn btn-blue" data-page="ontwikkeltraject" data-sub="reminder-confirmed" data-type="button">
+    </form>
+  </div>
+  <!-- Eńd Rest: roadmap sent -->
+
+  <div ng-if="noadvicedisplay" class="notify">
     <div class="detail">
       <p>Er is geen ontwikkelingstraject voor je actief.</p>
     </div>
-    <form ng-submit="getProfile()" class="buttoncent">
-      <input type="submit" value="Profiel" class="btn btn-blue" data-page="ontwikkelingsresultaten" data-sub="notrajecten" data-type="button">
+    <form ng-submit="getHome()" class="buttoncent">
+      <input type="submit" value="Ga naar overzicht" class="btn btn-blue" data-page="ontwikkeltraject" data-sub="notrajecten" data-type="button">
     </form>
   </div>
 </div>

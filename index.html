@@ -5,13 +5,14 @@
     <script>(function(w,d,s,l,i){
   w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
   var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-5J4R9F5');</script>
+})(window,document,'script','dataLayer','GTM-5X6X58H');</script>
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-touch.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-sanitize.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase-database.js"></script>
     <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
@@ -52,9 +53,11 @@
     <script src="controllers/functioneringsarchief.js"></script>
     <script src="controllers/userdata.js"></script>
     <script src="controllers/userlist.js"></script>
+    <script src="controllers/notifications-accept.js"></script>
     <script src="controllers/0test.js"></script>
     <link rel="stylesheet" media="all" href="assets/style.css" />
     <link rel="stylesheet" media="all" href="assets/menu.css" />
+    <link rel="stylesheet" href="https://cdn.metroui.org.ua/v4/css/metro-icons.min.css">
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/2.4.1/firebase-ui-auth.css" />
     <link rel="manifest" href="manifest.json">
     <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
@@ -64,9 +67,16 @@
   <body ng-app="workfit">
     <div id="header">
       <wf-menu></wf-menu>
-      <img src="assets/workfit-logo.jpeg">
+      <a href="/"><img src="assets/workfit-logo.png"></a>
     </div>
     <wf-login></wf-login>
+    <div ng-controller="ScreenController">
+      <!--<button ng-click="removeLS()"></button>-->
+      <div id="screenmessage" ng-show="showmessage">
+        <div class="buttonclose" ng-click="closeMessage()"></div>
+        <div>{{ message }}</div>
+      </div>
+    </div>
     <div id="spinner" class="spinner">
       <div class="rect1"></div>
       <div class="rect2"></div>
@@ -82,7 +92,7 @@
       var analytics = {landingspage: landingspage, user: ''};
     </script>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5J4R9F5" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5X6X58H" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
   </body>
 

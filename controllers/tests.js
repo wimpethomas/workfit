@@ -10,7 +10,7 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
   var urlTestNr = $routeParams.tid;
   var nowString = Functions.setWfDate();
   // Set notification date for test reminder on days + 3 (in test 1)
-  var datumRemString = Functions.setWfDate('notification', 1);
+  var datumRemString = Functions.setWfDate('notification', 3);
 
   // Define testgebieden en type
   if (urlTestNr !== undefined) preTest('unfinished', [urlGebied], parseInt(urlTestNr));
@@ -53,7 +53,10 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
       case 'incoaching':
         $scope.incoachingdisplay = true;
         $scope.getAdvice = function() {
-          $location.path('/advies/' + gebieden[0] + '/' + testNr);
+          Store.setResults('testnr', testNr);
+          Store.setResults('resultgebied', gebieden[0]);
+          $location.path('/results/' + gebieden[0] + '/' + testNr + '/verbeter');
+          //$location.path('/advies/' + gebieden[0] + '/' + testNr); // OUD
         }
         break;
       case 'unfinished':
@@ -211,7 +214,7 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
       $scope.changed = function(val, nr) {
         store[gebied][nr].value = parseInt(val);
         var onderdeel = store[gebied][nr].onderdeel;
-        var onderdeelId = valToKey(onderdeel, onderdelenObj);
+        var onderdeelId = Functions.valToKey(onderdeel, onderdelenObj);
         firebase.database().ref().child('responses/' + username + '/test/' + gebied + '/test-' + testNr + '/vals/' + nr).set({
           q: val,
           ond: onderdeelId
@@ -230,10 +233,8 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
           Store.setResults('testresults', store);
           $location.path('/results');
         }
-        // Set a checked mark when question is answered - with timeout because of 0,5 second animation
-        setTimeout(function() {
-          $scope.checkedquestion[nr] = true;
-        }, 500);
+        // Set a checked mark when question is answered
+        $scope.checkedquestion[nr] = true;
       };
 
       $scope.prevQuestion = function(nr) {
@@ -251,14 +252,8 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
     $location.path('/tests/' + gebiedI);
   }
 
-  $scope.getProfile = function() {
-    $location.path('/profiel');
+  $scope.getHome = function() {
+    $location.path('/');
   }
 
-  function valToKey(val, obj) {
-    for (var key in obj) {
-      if (obj[key] == val) return key;
-    }
-    return false;
-  }
 }

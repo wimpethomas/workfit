@@ -32,7 +32,8 @@ function notification() {
       catch (function(err) {
         // User has blocked WorkFit to send notifications. TODO: let user know that notifications must be allowed
         console.log('Unable to get permission to notify.', err);
-        alert('Je moet notificaties toestaan om de app te laten werken');
+        // alert('Je moet notificaties toestaan om de app te laten werken');
+        return err;
       });
     });
   };
@@ -40,4 +41,5 @@ function notification() {
   return {
     notify: setNotification
   };
+
 }

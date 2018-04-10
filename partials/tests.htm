@@ -1,5 +1,5 @@
 <div id="content">
-  <div ng-repeat="question in questions" ng-show="question.display" class="question">
+  <div ng-repeat="question in questions" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
     <div class="progressbar">
       <button ng-click="prevQuestion($index)" value="Terug" ng-if="$index > 0" class="btnsmall btn-green btnprev" data-page="gebiedstest" data-sub="test" data-type="button-small">Terug</button>
       <button ng-click="nextQuestion($index)" value="Volgende" ng-if="checkedquestion[$index]" class="btnsmall btn-green btnnext" data-page="gebiedstest" data-sub="test" data-type="button-small">Volgende</button>
@@ -30,7 +30,7 @@
       <p>Vanuit de nulmeting of wekelijkse check zijn er geen risicogebieden geconstateerd voor wat betreft gezondheid en welzijn op het werk en zodoende geen nadere vragen noodzakelijk.</p>
       <p>Maar je bent vrij om deze vragen per risicogebied alsnog te doorlopen. Kies een gebied voor het maken van een ontwikkelingstest.</p>
     </div>
-    <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+    <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" ng-if="value !== 'functionering'" class="buttoncent">
       <input type="submit" value="{{ value }}" class="btn btn-red" data-page="gebiedstest" data-sub="notests" data-type="button">
       <br>
     </form>
@@ -40,7 +40,7 @@
     <div class="detail">
       <p>Je hebt zojuist een test afgerond op het gebied {{ gebied }}. Weet je zeker dat je nog een test voor een ander risicogebied wilt doen? Zo ja, kies een van onderstaande tests.'</p>
     </div>
-    <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+    <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" ng-if="value !== 'functionering'" class="buttoncent">
       <input type="submit" value="{{ value }}" class="btn btn-red" data-page="gebiedstest" data-sub="afgerond" data-type="button">
       <br>
     </form>
@@ -48,13 +48,13 @@
 
   <div ng-show="incoachingdisplay" class="notify">
     <div class="detail">
-      <p>Je hebt onvoldoende gescoord op het gebied {{ gebied }}. Als je daarvoor nog geen ontwikkelingstraject hebt aangemaakt, raden we je aan dit te doen. Heb je er wel een aangemaakt, raden we je aan deze eerst af te maken.</p>
+      <p>Je hebt onvoldoende gescoord op het gebied {{ gebied }}. Als je daarvoor nog geen ontwikkeltraject hebt aangemaakt, raden we je aan dit te doen. Heb je er wel een aangemaakt, raden we je aan deze eerst af te maken.</p>
       <form ng-submit="getAdvice()" class="buttoncent">
-        <input type="submit" value="Advies {{ gebied }}" class="btn btn-blue" data-page="gebiedstest" data-sub="in-coaching" data-type="button">
+        <input type="submit" value="Ontwikkeltraject {{ gebied }}" class="btn btn-blue" data-page="gebiedstest" data-sub="in-coaching" data-type="button">
         <br>
       </form>
       <p>Je kunt ook een losse test doen op een van de volgende gebieden.</p>
-      <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" class="buttoncent">
+      <form ng-submit="getTest(key)" ng-repeat="(key, value) in notests" ng-if="value !== 'functionering'" class="buttoncent">
         <input type="submit" value="{{ value }}" class="btn btn-red" data-page="gebiedstest" data-sub="in-coaching" data-type="button">
         <br>
       </form>
@@ -66,7 +66,7 @@
       <p>{{ text }}</p>
     </div>
     <div class="buttoncent">
-      <form ng-submit="getProfile()" class="buttoninline">
+      <form ng-submit="getHome()" class="buttoninline">
         <input type="submit" value="Sla over" class="btn btn-blue spacer" data-page="gebiedstest" data-sub="finish" data-type="button">
       </form>
       <form ng-submit="finishTest()" class="buttoninline">

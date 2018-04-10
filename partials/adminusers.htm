@@ -1,37 +1,41 @@
 <div id="content">
   <div class="notify" ng-show="addusersdisplay">
     <div class="buttoncent">
-      <button class="btn btn-green" ng-click="multiadd = false; userlist = false" ng-show="multiadd || userlist">Voeg enkele user(s) toe</button>
-      <button class="btn btn-green" ng-click="multiadd = true; userlist = false" ng-show="!multiadd">Voeg meerdere users toe</button>
-      <button class="btn btn-green" ng-click="multiadd = false; userlist = true" ng-show="!userlist">Beheer users</button>
+      <button class="btn btn-green" ng-click="multiadd = false; userlist = false" ng-show="multiadd || userlist" data-page="adminusers" data-sub="menu" data-type="button">Voeg enkele user(s) toe</button>
+      <button class="btn btn-green" ng-click="multiadd = true; userlist = false" ng-show="!multiadd" data-page="adminusers" data-sub="menu" data-type="button">Voeg meerdere users toe</button>
+      <button class="btn btn-green" ng-click="multiadd = false; userlist = true" ng-show="!userlist" data-page="adminusers" data-sub="menu" data-type="button">Beheer users</button>
     </div>
     <div ng-show="!multiadd && !userlist">
       <p>Invoer voor enkele user(s)</p>
+      <p><span>Stuur direct al uitnodigingsmail</span><input ng-if="role = 'superadmin'" type="checkbox" ng-model="sendMail" ng-change="changed(sendMail)" style="transform: scale(1.5); margin-left: 20px;"></p>
       <div ng-repeat="email in users track by $index" class="btninput btn75" style="float: left;">
         <div class="btn100">
-          <input type="text" ng-model="users[$index].email" placeholder="Gebruiker {{ $index+1 }}" class="btninput">
-          <div ng-dropdown-multiselect="" options="roledataSuperAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" style="float:right;" ng-show="bedrijfdisplay"></div>
-          <div ng-dropdown-multiselect="" options="roledataAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" style="float:right;" ng-show="!bedrijfdisplay"></div>
-          <div ng-dropdown-multiselect="" options="leidingEmail" selected-model="users[$index].leidinggevende" extra-settings="lgsettings" translation-texts="lgcustomTexts" style="float:left;" ng-if="isWerknemer($index)"></div>
+          <input type="text" ng-model="users[$index].email" placeholder="Emailadres {{ $index+1 }}" class="btninput btn50">
+          <input type="text" ng-model="users[$index].naam" placeholder="Naam {{ $index+1 }}" class="btninput btn50" class="next">
+          <div ng-dropdown-multiselect="" options="roledataSuperAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" ng-show="bedrijfdisplay" class="btn50 prev"></div>
+          <div ng-dropdown-multiselect="" options="roledataAdm" selected-model="users[$index].type" extra-settings="rolesettings" translation-texts="rolecustomTexts" ng-show="!bedrijfdisplay" class="btn50 prev"></div>
+          <div ng-dropdown-multiselect="" options="leidingEmail" selected-model="users[$index].leidinggevende" extra-settings="lgsettings" translation-texts="lgcustomTexts" class="btn50 next" ng-if="isWerknemer($index)"></div>
         </div>
         <input type="text" ng-model="users[$index].bedrijf" placeholder="Bedrijf {{ $index+1 }}" class="btninput btn100" ng-show="bedrijfdisplay">
       </div>
-      <button ng-click="removeUser()" ng-show="showbutton" class="btn btn-blue" style="float: right;">-</button>
-      <button ng-click="addUser()" class="btn btn-red" style="float: right;">+</button>
+      <button ng-click="removeUser()" ng-show="showbutton" class="btn btn-blue" style="float: right;" data-page="adminusers" data-sub="single-user" data-type="button-small">-</button>
+      <button ng-click="addUser()" class="btn btn-red" style="float: right;" data-page="adminusers" data-sub="single-user" data-type="button-small">+</button>
       <div>
-        <button ng-click="submitUsers()" class="btn btn-red">Voeg users toe</button>
+        <button ng-click="submitUsers()" class="btn btn-red" data-page="adminusers" data-sub="single-user" data-type="button">Voeg users toe</button>
       </div>
       <pre style="clear:both;">{{ users | json }}</pre>
 
     </div>
     <div ng-show="multiadd && !userlist">
-      <textarea rows="4" ng-model="userlist" placeholder="Plak hier de e-mailadressen. Doe dit komma gescheiden of 1 e-mailadres per regel" class="btninput btn100" required></textarea>
-      <p><button ng-click="submitMultipleUsers()" class="btn btn-red">Voeg users toe</button></p>
+      <div ng-if="role = 'superadmin'" ng-dropdown-multiselect="" options="bedrijven" selected-model="bedrijvenmodel" extra-settings="bedrijfsettings" translation-texts="bedrijfcustomTexts" events="bedrijfevent" class="btn50 prev"></div>
+      <p><span>Stuur direct al uitnodigingsmail</span><input ng-if="role = 'superadmin'" type="checkbox" ng-model="sendMail" ng-change="changed(sendMail)" style="transform: scale(1.5); margin-left: 20px;"></p>
+      <textarea rows="10" ng-model="multiinput" style="padding:8px;" placeholder="Plak hier per regel de gegevens van een gebruiker. Doe dit komma gescheiden en in de volgende volgorde: emailadres, volledige naam, werknemer en/of leidinggevende, emailadres leidinggevende (indien werknemer). Bv:&#10;johndoe@workfit-pmo.nl, John Doe, werknemer, baasvanjohndoe@workfit-pmo.nl&#10;baasvanjohndoe@workfit-pmo.nl, Baas Doe, werknemer+leidinggevende, baasvanbaasvanjohndoe@workfit-pmo.nl" class="btninput btn100" required></textarea>
+      <p><button ng-click="submitMultipleUsers(bedrijvenmodel)" class="btn btn-red" data-page="adminusers" data-sub="multi-user" data-type="button">Voeg users toe</button></p>
     </div>
     <div ng-show="userlist && !multiadd">
       <table>
         <tr>
-          <th>Gebruiker</th>
+          <th>Emailadres</th>
           <th>Rollen</th>
           <th>Leidinggevende</th>
           <th></th>
@@ -40,7 +44,7 @@
           <td>{{ user.email }}</td>
           <td>{{ user.type }}</td>
           <td>{{ user.boss }}</td>
-          <td><button class="btn btn-red" ng-click="deleteUser(user)">X</button></td>
+          <td><button class="btn btn-red" ng-click="deleteUser(user)" data-page="adminusers" data-sub="delete-user" data-type="button-small">X</button></td>
         </tr>
       </table>
     </div>

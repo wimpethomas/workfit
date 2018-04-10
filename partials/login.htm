@@ -6,12 +6,12 @@
       <div class="error">{{ unerror }}</div>
       <input type="password" ng-model="password" placeholder="Password" class="btninput btn100" required>
       <div class="error">{{ pwerror }}</div>
-      <div>
-        <div class="prev smalltext">Nog geen account?&nbsp;<a class="underline" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay">Registreer je</a>
-          <br>
-          <a class="underline" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay">Problemen met inloggen</a>
-        </div>
-        <input class="btn btn-red next topspace" type="submit" value="Login">
+      <div class="buttoncent" style="margin-bottom: 20px;">
+        <button class="btn btn-blue spacer" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay" data-page="login-registreren" data-sub="login" data-type="button">Registreer</button>
+        <input class="btn btn-red spacer" type="submit" value="Login" style="min-width: 120px;" data-page="login-registreren" data-sub="login" data-type="button">
+      </div>
+      <div class="buttoncent">
+        <button class="btn btn-transparent" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay" data-page="login-registreren" data-sub="login" data-type="button">Wachtwoord vergeten</button>
       </div>
     </form>
   </div>
@@ -22,10 +22,9 @@
       <div class="error">{{ unrerror }}</div>
       <input type="password" ng-model="password" placeholder="Password" class="btninput btn100">
       <div class="error">{{ pwrerror }}</div>
-      <div>
-        <div class="prev smalltext">Al een account?&nbsp;<a class="underline" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay">Login</a>
-        </div>
-        <input class="btn btn-red next topspace" type="submit" value="Registreer">
+      <div class="buttoncent">
+        <button class="btn btn-blue spacer" ng-click="logindisplay = !logindisplay; signupdisplay = !signupdisplay" style="min-width: 120px;" data-page="login-registreren" data-sub="registreren" data-type="button">Login</button>
+        <input class="btn btn-red spacer" type="submit" value="Registreer" data-page="login-registreren" data-sub="registreren" data-type="button">
       </div>
     </form>
   </div>
@@ -34,16 +33,15 @@
     <p>Er wordt een e-mail naar dit adres verzonden met instructies om je wachtwoord te resetten</p>
     <form ng-submit="reset()">
       <input type="email" ng-model="email" placeholder="Email" class="btninput btn100">
-      <div>
-        <div class="prev"><a class="underline" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay">Annuleer</a>
-        </div>
-        <input class="btn btn-red next topspace" type="submit" value="Verzend">
+      <div class="buttoncent">
+        <button class="btn btn-transparent spacer" ng-click="logindisplay = !logindisplay; resetdisplay = !resetdisplay" style="min-width: 120px;" data-page="login-registreren" data-sub="wachtwoord-vergeten" data-type="button">Terug</button>
+        <input class="btn btn-red spacer" type="submit" value="Verzend" style="min-width: 120px;" data-page="login-registreren" data-sub="wachtwoord-vergeten" data-type="button">
       </div>
     </form>
   </div>
   <div ng-show="resetsentdisplay" class="notify">
     <p>Wachtwoord verstuurd</p>
     <p>Een wachtwoord reset link is verstuurd naar je e-mailadres.</p>
-    <button class="btn btn-red" ng-click="logindisplay = !logindisplay; resetsentdisplay = !resetsentdisplay">Login</button>
+    <button class="btn btn-red" ng-click="logindisplay = !logindisplay; resetsentdisplay = !resetsentdisplay" data-page="login-registreren" data-sub="wachtwoord-verstuurd" data-type="button">Login</button>
   </div>
 </div>

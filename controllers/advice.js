@@ -14,17 +14,8 @@ function AdviceCtrl($scope, $location, $routeParams, $sce, ResponsesPerUser, Sto
   var nowString = now.toISOString();
   // Set notification date for test reminder on days + 3 (in test 1)
   var datumRem = new Date();
-  datumRem.setDate(datumRem.getDate() + 1);
+  datumRem.setDate(datumRem.getDate() + 3);
   var datumRemString = datumRem.toISOString().split('T')[0];
-
-  var testlog = {
-    resultgebied: storedGebied,
-    testresults: Store.getResults().testresults,
-    testnr: storedTestnr,
-    persoonlijkheid: Store.getResults().personality,
-    niveaus: Store.getResults().niveaus
-  };
-  console.log(testlog);
 
   // Define types
   if (urlGebied == 'uitleg') getUitleg();

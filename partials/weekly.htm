@@ -8,8 +8,8 @@
 
   <div class="notify" ng-show="duplicatedisplay">
     <p>Je hebt de wekelijkse vragen voor deze week al gedaan.</p>
-    <form ng-submit="getProfile()" class="buttoncent">
-      <input type="submit" value="Ga naar profiel" class="btn btn-blue" data-page="wekelijks" data-sub="afgerond" data-type="button">
+    <form ng-submit="getHome()" class="buttoncent">
+      <input type="submit" value="Ga naar overzicht" class="btn btn-blue" data-page="wekelijks" data-sub="afgerond" data-type="button">
     </form>
   </div>
 
@@ -23,7 +23,7 @@
   <div ng-show="questionsdisplay">
     <div ng-repeat="questionSet in questions" id="{{ questionSet.gebied }}" ng-init="gebiedIndex = $index">
       <div ng-repeat="question in questionSet.values" ng-init="vraagIndex = $index" class="questions">
-        <div ng-if="question.basis" ng-show="question.display" class="question">
+        <div ng-if="question.basis" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
           <div class="progress progressbar" ng-if="gebiedIndex < 3">vraag {{ gebiedIndex + 1 }} van {{ questions.length - 1 }}</div>
           <div class="progress progressbar" ng-if="gebiedIndex == 3">vraag {{ gebiedIndex }} van {{ questions.length - 1 }}</div>
           <div class="progresssub" ng-if="(gebiedIndex == 2 || gebiedIndex == 3) && vraagIndex !== 0">subvraag {{ vraagIndex }} van {{ questionSet.values.length - 1 }}</div>
@@ -36,7 +36,7 @@
           </div>
         </div>
         <!-- Stress & Vermoeidheid Followup -->
-        <div ng-if="!question.basis" ng-show="question.display" class="question">
+        <div ng-if="!question.basis" ng-show="question.display" class="question" ng-class="{isshow: question.display}">
           <div class="progress progressbar">vraag {{ gebiedIndex + 1 }} van {{ questions.length - 1 }}</div>
           <div class="progresssub">subvraag {{ vraagIndex }} van {{ questionSet.values.length - 1 }}</div>
           <div class="detail">{{ question.q }}</div>

@@ -2,31 +2,70 @@
   <div class="tabcontainer">
     <div ng-repeat="tab in tabs" class="tab" ng-click="onClickTab(tab)" ng-class="{'activetab':isActiveTab(tab)}" data-page="testresultaten" data-sub="tab" data-type="tab">{{ tab }}</div>
   </div>
-  <div ng-repeat="(key, value) in results.lastresults" ng-show="value.display" ng-if="homedisplay" class="result">
-    <!-- Archief -->
-    <form ng-submit="getAdvice(key, value.resultnr)" class="buttoncent" ng-if="!buttoninview">
-      <input type="submit" value="Ga verder" class="btn btn-blue" data-page="testresultaten" data-sub="home" data-type="button-top">
-    </form>
-    <div class="detail">
-      <p>De resultaten van je laatst gemaakte test op het gebied <b>{{ value.name }}</b>:</p>
-    </div>
-    <ul class="box">
-      <li ng-repeat="niveau in value.results.niveaus" class="box">{{ niveau.value }}</li>
+
+  <!-- Home -->
+  <div ng-if="homedisplay" ng-repeat="(key, value) in results.lastresults" ng-show="value.display" class="result">
+    <!--<form ng-submit="getAdvice(key, value.resultnr)" class="buttoncent" ng-if="!buttoninview">
+<input type="submit" value="Ga verder" class="btn btn-blue" data-page="testresultaten" data-sub="home" data-type="button-top">
+</form>
+-->
+
+    <p class="detail" ng-if="!directdisplay">Op basis van je laatst gemaakte test op het gebied <b>{{ value.name }}</b> zijn dit je sterke (+) en minder sterke (-) punten:</p>
+    <p class="detail" ng-if="directdisplay">Op basis van de zojuist afgerond test op het gebied <b>{{ value.name }}</b> zijn dit je sterke (+) en minder sterke (-) punten:</p>
+    <ul ng-repeat="niveau in value.results.niveausSorted" class="boxpm" ng-class="niveau.indicator">
+      <li>{{ niveau.value }}</li>
     </ul>
     <div>
-      <p>Wil je meer inzicht?</p>
+      <div ng-if="value.personalitydisplay">
+        <p>Uit de persoonlijkheidstest die je hebt gemaakt, komt het volgende naar voren:</p>
+        <ul class="box">
+          <li ng-repeat="p in value.results.persoonlijkheid.traitbullets" class="box">{{ p }}</li>
+        </ul>
+        <p>{{ value.results.persoonlijkheid.combotext }}</p>
+        <ul class="box">
+          <li ng-repeat="r in value.results.persoonlijkheid.combobullets" class="box">{{ r }}</li>
+        </ul>
+      </div>
+      <p ng-if="!value.hasadvicedisplay && value.onderdelenmeta.lowest">
+        Wil je je ontwikkelen op één of meer van je minder sterke punten? Start dan een ontwikkelstraject.
+        <span ng-if="!value.fuunfinisheddisplay && !value.funopersdisplay">Wij helpen je daarbij een handje door een vooraf ingevuld traject klaar te zetten gebaseerd op jouw profiel, dat je naar eigen wens kunt aanpassen.</span>
+        <span ng-if="value.fuunfinisheddisplay">Er staat een vooraf ingevuld traject voor je klaar, dat je naar eigen wens kunt aanpassen.
+          Wil je een traject dat <b>specifiek op jouw persoonlijkheid en karakter</b> aansluit, maak dan eerst je persoonlijkheidstest af.</span>
+        <span ng-if="value.funopersdisplay">Er staat een vooraf ingevuld traject voor je klaar, dat je naar eigen wens kunt aanpassen.
+          Wil je een traject dat <b>specifiek op jouw persoonlijkheid en karakter</b> aansluit, maak dan eerst een persoonlijkheidstest. Deze test doe je eenmalig en bestaat uit 40 korte vragen.</span>
+      </p>
+      <p ng-if="value.hasadvicedisplay && value.onderdelenmeta.lowest">
+        Je hebt voor deze gebiedstest al een ontwikkelingstraject aangemaakt.
+      </p>
+      <p ng-if="!value.onderdelenmeta.lowest">
+        Uit de gebiedstest komen geen zwakke punten naar voren. Prima! Er is dus ook geen noodzaak om een ontwikkelstraject te starten.
+      </p>
     </div>
-    <form ng-submit="getAdvice(key, value.resultnr)" class="buttoncent">
-      <input type="submit" value="Ga verder" class="btn btn-blue" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
-    </form>
+    <div class="buttoncent">
+      <form ng-if="value.funopersdisplay" ng-submit="getSolution('indirect', key, value.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Doe persoonlijkheidstest" class="btn btn-red spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+      </form>
+      <form ng-if="value.fuunfinisheddisplay" ng-submit="getSolution('indirect', key, value.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Maak persoonlijkheidstest af" class="btn btn-red spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+      </form>
+      <form ng-if="!value.hasadvicedisplay && value.onderdelenmeta.lowest" ng-submit="getSolution('direct', key, value.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Start ontwikkelingstraject" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+      </form>
+      <form ng-if="value.hasadvicedisplay && value.onderdelenmeta.lowest" ng-submit="getSolution('direct', key, value.resultnr, false)" class="buttoninline">
+        <input type="submit" value="Naar ontwikkelingstraject" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+      </form>
+      <form ng-if="!value.onderdelenmeta.lowest" ng-submit="getSolution('direct', key, value.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Ga verder" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+      </form>
+    </div>
     <div ng-if="value.amountofresults - value.amountofresultsfor.pending > 1">
       <p>Wil je oudere testresultaten zien?</p>
       <form ng-submit="toGebiedResults(key)" class="buttoncent">
-        <input type="submit" value="Archief" class="btn btn-green" data-page="testresultaten" data-sub="home" data-type="button-bottom">
+        <input type="submit" value="Archief" class="btn btn-transparent" data-page="testresultaten" data-sub="home" data-type="button-bottom">
       </form>
     </div>
-    <!-- End Archief -->
   </div>
+  <!-- End Home -->
 
   <!-- Archief per Gebied -->
   <div ng-if="gebiedviewdisplay" class="result">
@@ -40,21 +79,59 @@
 
   <!-- View display of result -->
   <div ng-show="viewresultdisplay" class="result">
-    <form ng-submit="getAdvice(gebied, resultnr, niveaus)" class="buttoncent" ng-if="!buttoninview2">
-      <input type="submit" value="Ga verder" class="btn btn-blue spacer" data-page="testresultaten" data-sub="detailpagina" data-type="button-top">
-    </form>
-    <p>De resultaten van de test op het gebied <b>{{ gebiedsnaam }}</b> zijn:
-    <ul class="box">
-      <li ng-repeat="niveau in niveaus[gebied]" class="box">{{ niveau.value }}</li>
+    <!--
+<form ng-submit="getAdvice(gebied, resultnr, niveaus)" class="buttoncent" ng-if="!buttoninview2">
+<input type="submit" value="Ga verder" class="btn btn-blue spacer" data-page="testresultaten" data-sub="detailpagina" data-type="button-top">
+</form>
+-->
+    <p>Onderstaand je sterke (+) en minder sterke (-) punten die volgen uit de test op het gebied <b>{{ gebiedsnaam }}</b>:
+    <ul ng-repeat="niveau in gebiedS.results.niveausSorted" class="boxpm" ng-class="niveau.indicator">
+      <li>{{ niveau.value }}</li>
     </ul>
+
+    <div>
+      <div ng-if="gebied.personalitydisplay">
+        <p>Uit de persoonlijkheidstest die je hebt gemaakt, komt het volgende naar voren:</p>
+        <ul class="box">
+          <li ng-repeat="p in gebiedS.results.persoonlijkheid.traitbullets" class="box">{{ p }}</li>
+        </ul>
+        <p>{{ gebiedS.results.persoonlijkheid.combotext }}</p>
+        <ul class="box">
+          <li ng-repeat="r in gebiedS.results.persoonlijkheid.combobullets" class="box">{{ r }}</li>
+        </ul>
+      </div>
+      <p ng-if="!gebiedS.hasadvicedisplay">
+        Wil je je ontwikkelen op één of meer van je minder sterke punten? Start dan een ontwikkelingstraject.
+        <span ng-if="!gebiedS.fuunfinisheddisplay && !gebiedS.funopersdisplay">Wij helpen je daarbij een handje door een vooraf ingevuld traject klaar te zetten gebaseerd op jouw profiel, dat je naar eigen wens kunt aanpassen.</span>
+        <span ng-if="gebiedS.fuunfinisheddisplay">Er staat een vooraf ingevuld traject voor je klaar, dat je naar eigen wens kunt aanpassen.
+          Wil je een traject dat <b>specifiek op jouw persoonlijkheid en karakter</b> aansluit, maak dan eerst je persoonlijkheidstest af.</span>
+        <span ng-if="gebiedS.funopersdisplay">Er staat een vooraf ingevuld traject voor je klaar, dat je naar eigen wens kunt aanpassen.
+          Wil je een traject dat <b>specifiek op jouw persoonlijkheid en karakter</b> aansluit, maak dan eerst een persoonlijkheidstest. Deze test doe je eenmalig en bestaat uit 40 korte vragen.</span>
+      </p>
+      <p ng-if="gebiedS.hasadvicedisplay">
+        Je hebt voor deze gebiedstest al een ontwikkelingstraject aangemaakt.
+      </p>
+    </div>
     <div class="buttoncent">
-      <form ng-submit="toGebiedResults(gebied)" class="buttoninline">
-        <input type="submit" value="Terug" class="btn btn-green spacer" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+      <form ng-if="gebiedS.funopersdisplay" ng-submit="getSolution('indirect', gebied, gebiedS.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Doe persoonlijkheidstest" class="btn btn-red spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
       </form>
-      <form ng-submit="getAdvice(gebied, resultnr, niveaus)" class="buttoninline">
-        <input type="submit" value="Ga verder" class="btn btn-blue spacer" in-view="buttoninview2 = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+      <form ng-if="gebiedS.fuunfinisheddisplay" ng-submit="getSolution('indirect', gebied, gebiedS.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Maak persoonlijkheidstest af" class="btn btn-red spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+      </form>
+      <form ng-if="!gebiedS.hasadvicedisplay && gebiedS.onderdelenmeta.lowest" ng-submit="getSolution('direct', gebied, gebiedS.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Start ontwikkelingstraject" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+      </form>
+      <form ng-if="gebiedS.hasadvicedisplay && gebiedS.onderdelenmeta.lowest" ng-submit="getSolution('direct', gebied, gebiedS.resultnr, false)" class="buttoninline">
+        <input type="submit" value="Naar ontwikkelingstraject" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+      </form>
+      <form ng-if="!gebiedS.onderdelenmeta.lowest" ng-submit="getSolution('direct', gebied, gebiedS.resultnr, true)" class="buttoninline">
+        <input type="submit" value="Ga verder" class="btn btn-blue spacer" in-view="buttoninview = $inview" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
       </form>
     </div>
+    <form ng-submit="toGebiedResults(gebied)" class="buttoncent">
+      <input type="submit" value="Terug" class="btn btn-green" data-page="testresultaten" data-sub="detailpagina" data-type="button-bottom">
+    </form>
   </div>
   <!-- End View display of result -->
 

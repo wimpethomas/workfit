@@ -31,7 +31,7 @@ var uiConfig = {
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtube-embed', 'angular-inview', 'angularjs-dropdown-multiselect'])
+angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'ngSanitize', 'firebase', 'youtube-embed', 'angular-inview', 'angularjs-dropdown-multiselect'])
 .directive('wfMenu', wfMenu)
 .directive('wfLogin', Login)
 .config(function($routeProvider) {
@@ -48,7 +48,7 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/profile.htm",
     controller: ProfileCtrl
   })
-  .when("/weekly/:wid?", {
+  .when("/weekly/:test?", {
     templateUrl: "partials/weekly.htm",
     controller: ResponseCtrl
   })
@@ -56,7 +56,7 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/tests.htm",
     controller: TestsCtrl
   })
-  .when("/results/:gebied?/:tid?", {
+  .when("/results/:gebied?/:tid?/:type?", {
     templateUrl: "partials/results.htm",
     controller: ResultsCtrl
   })
@@ -84,7 +84,7 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/faq.htm",
     controller: FaqCtrl
   })
-  .when("/functioneringstest/:role?", {
+  .when("/functioneringstest/:role?/:user?", {
     templateUrl: "partials/functioneringstest.htm",
     controller: FuncTestCtrl
   })
@@ -116,6 +116,10 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
     templateUrl: "partials/adminusers.htm",
     controller: AdminUsersCtrl
   })
+  .when("/notifications-accept", {
+    templateUrl: "partials/notifications-accepteren.htm",
+    controller: NotifCtrl
+  })
   .when("/0test", {
     templateUrl: "partials/0test.htm",
     controller: TestCtrl
@@ -129,7 +133,7 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'firebase', 'youtu
 .factory('UserData', getUserData)
 .factory('ResponsesPerUser', getResponsesPerUser)
 .factory('User', getUser)
-.controller('LoginController', LoginCtrl);
+.controller('ScreenController', ScreenCtrl);
 
 function getQuestionsNew($firebaseObject, User) {
   return User.then(function(userObj) {
@@ -210,14 +214,17 @@ function wfMenu() {
   };
 }
 
-function wfMenuCtrl($scope, User) {
+function wfMenuCtrl($scope, UserData) {
   $scope.isShowingMenu = false;
   $scope.openMenu = openMenu;
   $scope.closeMenu = closeMenu;
   $scope.signOut = signOut;
 
-  User.then(function(userObj) {
-    if (userObj !== null) $scope.username = userObj.email;
+  UserData.then(function(userObj) {
+    if (userObj !== null) {
+      $scope.username = userObj.email;
+      $scope.bedrijf = userObj.bedrijf;
+    }
     else $scope.username = 'Anoniem';
   })
 
@@ -249,7 +256,8 @@ function LoginCtrl($scope, User) {
     if (data == 'anonymous') {
       $scope.logindisplay = true;
       document.getElementById('wrapper').style.display = 'none';
-    } else document.getElementById('loginunit').remove();
+    }
+    else document.getElementById('loginunit').remove();
 
     $scope.login = function() {
       firebase.auth().signInWithEmailAndPassword($scope.email, $scope.password).then(function(user) {
@@ -318,6 +326,32 @@ function LoginCtrl($scope, User) {
         console.log(errorCode);
         console.log(errorMessage);
       });
+    }
+  });
+}
+
+function ScreenCtrl($scope, User) {
+  var deviceType = navigator.userAgent; // Maybe for future use
+  var isMobile = window.innerWidth < 680;
+
+  //$scope.removeLS = function() {localStorage.removeItem("screenMessage");}
+
+  User.then(function(data) {
+    if (data !== 'anonymous' && !isMobile) {
+      var dateNow = new Date();
+      var msNow = dateNow.getTime();
+      // Store when not already stored
+      if (localStorage.getItem("screenMessage") == null) localStorage.setItem("screenMessage", JSON.stringify({"time": msNow, "displayed": 0}));
+      var stored = JSON.parse(localStorage.getItem("screenMessage"));
+      if (stored.displayed == 0 || (msNow - stored.time > 1000*60*60*24*30 && stored.displayed < 2)) {
+        $scope.showmessage = true;
+        $scope.message = "WorkFit is geoptimaliseerd voor gebruik op smartphones. Je kunt gewoon doorgaan op je huidige toestel, maar we raden je aan de app ook op een smartphone te proberen.";
+        localStorage.setItem("screenMessage", JSON.stringify({"time": stored.time, "displayed": stored.displayed + 1}));
+      }
+
+      $scope.closeMessage = function() {
+        $scope.showmessage = false;
+      }
     }
   });
 }

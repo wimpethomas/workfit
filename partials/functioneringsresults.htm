@@ -1,4 +1,9 @@
-<div id="content-2">
+<div id="content-2" class="extra" ng-show="chartloadeddisplay">
+  <div class="navlinks2">
+    <div ng-click="goBack()" class="menutab top" ng-class="{'menuactivetab': !showmoredisplay}" data-page="functionering-results" data-sub="navlink" data-type="tab">Resultaten</div>
+    <div ng-click="showMore(role)" class="menutab top" ng-class="{'menuactivetab': showmoredisplay}" data-page="functionering-results" data-sub="navlink" data-type="tab">Analyse/Advies</div>
+  </div>
+
   <div ng-show="!showmoredisplay">
     <div ng-show="chartloadeddisplay">
       <div class="chart-title">Resultaten eigen vragenlijst</div>
@@ -7,11 +12,11 @@
     </div>
 
     <div ng-show="bossdisplay">
-      <p class="notify">Onderstaand zijn de resultaten opgenomen van de vragenlijst ingevuld door {{ user }}. Grote verschillen in met de resultaten van de eigen (bovenstaande) vragenlijst duidt op een verschil van inzicht over het functioneren van {{ user }}.</p>
-      <div class="chart-title">Resultaten vragenlijst van {{ user }}</div>
-      <div id="chartslave" class="{{ chartClass }}"></div>
-      <p><button ng-show="switchdisplay" ng-click="switchView(switchType[0])" value="Switch" class="btnsmall btn-green" data-page="functionering-results" data-sub="switchgraph" data-type="button-small">{{ switchType[1] }}</button></p>
-      <div>&nbsp;</div>
+      <p class="notify">Onderstaand zijn de resultaten opgenomen van de vragenlijst ingevuld door {{ werknemer }}. Grote verschillen in met de resultaten van de eigen (bovenstaande) vragenlijst duidt op een verschil van inzicht over het functioneren van {{ werknemer }}.</p>
+      <div class="chart-title" ng-if="!noresultsdisplay">Resultaten vragenlijst van {{ werknemer }}</div>
+      <div id="chartslave" class="{{ chartClass }}" ng-if="!noresultsdisplay"></div>
+      <p ng-if="noresultsdisplay" class="notify">{{ werknemer }} is nog niet aan zijn vragenlijst begonnen. Er zijn dus nog geen resultaten van zijn vragenlijst beschikbaar.</p>
+      <p><button ng-show="switchdisplay && !noresultsdisplay" ng-click="switchView(switchType[0])" value="Switch" class="btnsmall btn-green" data-page="functionering-results" data-sub="switchgraph" data-type="button-small">{{ switchType[1] }}</button></p>
       <div>
         <p><button ng-click="showMore('leidinggevende')" class="btn btn-blue" data-page="functionering-results" data-sub="meer-leidinggevende" data-type="button">Nadere analyse en advies</button></p>
       </div>
@@ -24,25 +29,21 @@
   </div>
 
   <div ng-show="showmoredisplay" class="notify">
-    <div><button ng-click="goBack()" value="Terug" class="btnsmall btn-green" data-page="functionering-results" data-sub="advies" data-type="button-small">Terug</button></div>
+    <!--<div><button ng-click="goBack()" value="Terug" class="btnsmall btn-green" data-page="functionering-results" data-sub="advies" data-type="button-small">Terug</button></div>-->
     <div>&nbsp;</div>
     <div ng-show="!showmoreslavedisplay" style="text-align: justify;">
       <div ng-show="!slaveviewdisplay">
-        <div>Op basis van hoe jij {{ user }} inschat hebben we op drie onderdelen een analyse klaar staan van de werknemer en een advies hoe daar mee om te gaan. Wil je eenzelfde analyse, maar dan op basis van het zelfbeeld van {{ user }} zelf, klik dan hieronder.</div>
+        <div>Op basis van hoe jij {{ werknemer }} inschat hebben we op drie onderdelen een analyse klaar staan van de werknemer en een advies hoe daar mee om te gaan. Wil je eenzelfde analyse, maar dan op basis van het zelfbeeld van {{ werknemer }} zelf, klik dan hieronder.</div>
         <p><button ng-click="slaveviewdisplay = true" class="btn btn-blue" data-page="functionering-results" data-sub="werknemersview-leidinggevende" data-type="button">Werknemers point of view</button></p>
         <div>&nbsp;</div>
         <div><b>(1) Begeleidingsniveau</b><img class="info" ng-mouseover="ibb = !ibb" ng-mouseleave="ibb = !ibb" src="/assets/info.png"><span ng-show="ibb" class="itext">Op basis van eigen vragenlijst</span></div>
         <div><i>Analyse:</i> {{ shBoss.title }}</div>
         <div><i>Toelichting & Advies:</i> {{ shBoss.body }}</div>
         <div>&nbsp;</div>
-        <div><b>(2) Locus of control</b><img class="info" ng-mouseover="ilb = !ilb" ng-mouseleave="ilb = !ilb" src="/assets/info.png"><span ng-show="ilb" class="itext">Op basis van eigen vragenlijst</span></div>
-        <div><i>Analyse:</i> De locus of control van {{ user }} is {{ locBossIndex }}</div>
-        <div><i>Toelichting & Advies:</i> {{ locBoss }}</div>
-        <div>&nbsp;</div>
-        <div style="text-align: initial;"><b>(3) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ipb = !ipb" ng-mouseleave="ipb = !ipb" src="/assets/info.png"><span ng-show="ipb" class="itext">Op basis van {{ user }}'s persoonlijkheidstest</span></div>
-        <div ng-if="notshareddisplay">{{ user }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>
+        <div style="text-align: initial;"><b>(2) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ipb = !ipb" ng-mouseleave="ipb = !ipb" src="/assets/info.png"><span ng-show="ipb" class="itext">Op basis van {{ werknemer }}'s persoonlijkheidstest</span></div>
+        <div ng-if="notshareddisplay">{{ werknemer }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>
         <div ng-if="!notshareddisplay">
-          <div ng-if="nopersonalitydisplay">{{ user }} heeft nog niet de persoonlijkheidstest afgerond; er zijn nog geen resultaten beschikbaar.</div>
+          <div ng-if="nopersonalitydisplay">{{ werknemer }} heeft nog niet de persoonlijkheidstest afgerond; er zijn nog geen resultaten beschikbaar.</div>
           <div ng-if="!nopersonalitydisplay" ng-repeat="(key, value) in personality">
             <div class="detail"><i>Onderdeel:</i> {{ value.name }}</div>
             <div>{{ value.traitBoss }}</div>
@@ -51,21 +52,17 @@
         </div>
       </div>
       <div ng-show="slaveviewdisplay">
-        <div>Op basis van hoe {{ user }} zichzelf inschat hebben we op drie onderdelen een analyse klaar staan van de werknemer en een advies hoe daar mee om te gaan. Wil je eenzelfde analyse, maar dan op basis van jouw inschatting van {{ user }} zelf, klik dan hieronder.</div>
+        <div>Op basis van hoe {{ werknemer }} zichzelf inschat hebben we op drie onderdelen een analyse klaar staan van de werknemer en een advies hoe daar mee om te gaan. Wil je eenzelfde analyse, maar dan op basis van jouw inschatting van {{ werknemer }} zelf, klik dan hieronder.</div>
         <p><button ng-click="slaveviewdisplay = false" class="btn btn-blue" data-page="functionering-results" data-sub="leidinggevendeview-leidinggevende" data-type="button">Eigen point of view</button></p>
         <div>&nbsp;</div>
-        <div><b>(1) Begeleidingsniveau</b><img class="info" ng-mouseover="ibs = !ibs" ng-mouseleave="ibs = !ibs" src="/assets/info.png"><span ng-show="ibs" class="itext">Op basis van vragenlijst {{ user }}</span></div>
+        <div><b>(1) Begeleidingsniveau</b><img class="info" ng-mouseover="ibs = !ibs" ng-mouseleave="ibs = !ibs" src="/assets/info.png"><span ng-show="ibs" class="itext">Op basis van vragenlijst {{ werknemer }}</span></div>
         <div><i>Analyse:</i> {{ shSlave.title }}</div>
         <div><i>Toelichting & Advies:</i> {{ shSlave.body }}</div>
         <div>&nbsp;</div>
-        <div><b>(2) Locus of control</b><img class="info" ng-mouseover="ils = !ils" ng-mouseleave="ils = !ils" src="/assets/info.png"><span ng-show="ils" class="itext">Op basis van vragenlijst {{ user }}</span></div>
-        <div><i>Analyse:</i> De locus of control van {{ user }} is {{ locSlaveIndex }}</div>
-        <div><i>Toelichting & Advies:</i> {{ locSlave }}</div>
-        <div>&nbsp;</div>
-        <div style="text-align: initial;"><b>(3) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ips = !ips" ng-mouseleave="ips = !ips" src="/assets/info.png"><span ng-show="ips" class="itext">Op basis van {{ user }}'s persoonlijkheidstest</span></div>
-        <div ng-if="notshareddisplay">{{ user }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>
+        <div style="text-align: initial;"><b>(2) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ips = !ips" ng-mouseleave="ips = !ips" src="/assets/info.png"><span ng-show="ips" class="itext">Op basis van {{ werknemer }}'s persoonlijkheidstest</span></div>
+        <div ng-if="notshareddisplay">{{ werknemer }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>
         <div ng-if="!notshareddisplay">
-          <div ng-if="nopersonalitydisplay">{{ user }} heeft nog niet de persoonlijkheidstest afgerond; er zijn nog geen resultaten beschikbaar.</div>
+          <div ng-if="nopersonalitydisplay">{{ werknemer }} heeft nog niet de persoonlijkheidstest afgerond; er zijn nog geen resultaten beschikbaar.</div>
           <div ng-if="!nopersonalitydisplay" ng-repeat="(key, value) in personality">
             <div class="detail"><i>Onderdeel:</i> {{ value.name }}</div>
             <div>{{ value.traitBoss }}</div>
@@ -78,7 +75,7 @@
     <div ng-show="showmoreslavedisplay">
       <div><b>Persoonlijkheidskenmerken</b></div>
       <div ng-repeat="(key, value) in personality" class="result3">
-        <div class="detail"><p>Wat betreft <b>{{ value.name }}</b> geldt voor {{ user }} waarschijnlijk het volgende:</p></div>
+        <div class="detail"><p>Wat betreft <b>{{ value.name }}</b> geldt voor {{ werknemer }} waarschijnlijk het volgende:</p></div>
         <ul class="box">
           <li ng-repeat="n in value.traitChars" class="box2">{{ n }}</li>
         </ul>
@@ -91,3 +88,6 @@
       <p ng-show="thankyoudisplay">Bedankt voor het delen: het zal de kwaliteit van je functioneringsgesprek verbeteren.</p>
     </div>
   </div>
+
+  <ng-include src="'partials/functioneringsmenu.htm'"></ng-include>
+</div>

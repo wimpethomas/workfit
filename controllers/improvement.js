@@ -7,17 +7,6 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
   var funcNr = $routeParams.fid; // If coming van functioneringstrajecten
   var nowString = Functions.setWfDate();
 
-  var testlog = {
-    testgebieden: Store.getResults().testgebieden,
-    resultgebied: storedGebied,
-    testresults: Store.getResults().testresults,
-    testnr: storedTestnr,
-    testnrs: Store.getResults().testnrs,
-    persoonlijkheid: Store.getResults().personality,
-    niveaus: Store.getResults().niveaus
-  };
-  console.log(testlog);
-
   // Define type
   if (storedGebied !== undefined && storedTestnr !== undefined) getData('known', storedGebied, storedTestnr);
   else if (funcNr !== undefined) getData('func', undefined, funcNr);
@@ -36,33 +25,6 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
       laststepdone: lastStepDone,
       roadmapdone: roadmapDone
     };
-  }
-
-  function lastUnfinishedResult(responses) {
-    // Return charcteristics of last unfinished [type] - excluding a null-[type] (losse test)
-    var gebiedenInDB = responses == undefined ? 0 : Object.keys(responses); // Array with gebieden in db /[type]
-    var latest = [undefined, 0, undefined]; // latest[0] = [type]Str, latest[1] = datum_start, latest[2] = gebied
-    for (var i = 0; i < gebiedenInDB.length; i++) {
-      var resultsObj = responses == undefined ? undefined : responses[gebiedenInDB[i]]; // Object on level /advies/[gebied]
-      for (result in resultsObj) {
-        var dateResult = resultsObj[result].datum_start !== undefined ? Date.parse(resultsObj[result].datum_start) : 0;
-        if (dateResult > latest[1] && resultsObj[result].status == 'unfinished' && result.indexOf('null') == -1) latest = [result, dateResult, gebiedenInDB[i]]; // Only get an unfinished, no null [type]
-      }
-    }
-    if (latest[0] !== undefined) {
-      var resultStr = latest[0];
-      var resultNr = resultStr.split('-')[1];
-      if (resultNr == 'null') resultNr = null;
-      else resultNr = parseInt(resultNr);
-      var results = responses[latest[2]][latest[0]];
-      results.newadv = false;
-      return {
-        gebied: latest[2],
-        results: results,
-        resultnr: resultNr,
-        resultstr: resultStr
-      };
-    } else return undefined;
   }
 
   function pendingTest(responses) {
@@ -102,7 +64,7 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
             }
             break;
           case 'unknown': // Notification reminder roadmap
-            var lur = lastUnfinishedResult(responsesAdv);
+            var lur = Functions.lastUnfinishedResult(responsesAdv);
             if (lur !== undefined) {
               resultsObj[lur.gebied] = {
                 resultnr: lur.resultnr,
@@ -194,16 +156,9 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
     }
 
     // Roadmap setup and submit
-    $scope.roadmap = [{
-      step: '',
-      feedback: ''
-    }
-                     ];
+    $scope.roadmap = [{step: '', feedback: ''}];
     $scope.addStep = function() {
-      $scope.roadmap.push({
-        step: '',
-        feedback: ''
-      });
+      $scope.roadmap.push({step: '', feedback: ''});
       if ($scope.roadmap.length > 1) $scope.showbutton = true;
     }
     $scope.removeStep = function() {
@@ -240,15 +195,35 @@ function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Stor
       if (!roadmapDone) $scope.setreminderdisplay = true;
       else finishRoadmap();
     }
-    $scope.setReminder = function(step, type) {
-      // Set notification date for nulmeting reminder on days + given number of days
-      var datumRem = Functions.setWfDate('notification', parseInt($scope.notification));
 
-      if (type == 'y' || step == 1) firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + (step - 1) + '/datum_start').set(nowString);
-      firebase.database().ref().child('notifications/' + username + '/messageType').set('roadmap');
-      firebase.database().ref().child('notifications/' + username + '/datum').set(datumRem);
-      $scope.setreminderdisplay = false;
-      $scope.roadmapsentdisplay = true;
+    $scope.setReminder = function(step, type, skipped) {
+      //console.log(step, type, steps);
+      if (type == 'y' || step == 1 || skipped) firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + (step - 1) + '/datum_start').set(nowString);
+      if (!skipped){
+        // Set notification date for nulmeting reminder on days + given number of days
+        var datumRem = Functions.setWfDate('notification', parseInt($scope.notification));
+        firebase.database().ref().child('notifications/' + username + '/messageType').set('roadmap');
+        firebase.database().ref().child('notifications/' + username + '/datum').set(datumRem);
+        $scope.setreminderdisplay = false;
+        $scope.roadmapsentdisplay = true;
+      }
+      else {
+        firebase.database().ref().child('responses/' + username + '/advies/' + gebied + '/' + advStr + '/roadmap/' + (step - 1) + '/datum_end').set(nowString);
+        if (step >= steps.length) {
+          $scope.setreminderdisplay = false;
+          finishRoadmap();
+        }
+        else {
+          $scope.stepNext = step + 1;
+          $scope.stepNTxt = steps[step];
+          // Get animation effect via css
+          $scope.fadeOutIn = true;
+        }
+      }
+      // Reset animation class
+      setTimeout(function() {
+        $scope.fadeOutIn = false;
+      }, 1000);
     }
 
     function finishRoadmap() {

@@ -3,10 +3,12 @@ angular.module('workfit')
 
 function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPerUser, ResponseOptions, UserData, Customers, Store, Gebieden, Functions) {
   var urlRole = $routeParams.role;
+  var urlWerknemer = $routeParams.user;
   $scope.questions = [];
   var nowString = Functions.setWfDate();
+  $scope.nav = 'home';
 
-  // Dropdown settings
+  // Dropdown settings: for leidinggevende to select werknemer
   $scope.slaveddmodel = [];
   $scope.slaveddsettings = {checkBoxes: true,
                             keyboardControls: true,
@@ -21,12 +23,11 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
 
   Promise.all([ResponsesPerUser, UserData, QuestionsNew]).then(function(data) {
     var role = data[1].type;
-    if (urlRole !== undefined) var roleCat = urlRole;
+    if (urlRole !== undefined) var roleCat = urlRole == 'boss' ? 'leidinggevende' : 'werknemer';
     else if (role.indexOf('leidinggevende') > -1 && role.indexOf('werknemer') > -1) var roleCat = 'both';
     else if (role.indexOf('leidinggevende') > -1) var roleCat = 'leidinggevende';
     else if (role.indexOf('werknemer') > -1) var roleCat = 'werknemer';
     else var roleCat = 'none';
-    $scope.role = roleCat;
 
     data[0].responses.then(function(responses) {
       document.getElementById('spinner').style.display = 'none';
@@ -54,22 +55,30 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
               $scope.slaveselected = false;
             },
             onItemSelect: function(slaveEmail){
-              $scope.activetrajectdisplay = false;
-              $scope.viewagreementsdisplay = false;
+              $scope.activetrajectdisplay = $scope.viewagreementsdisplay = $scope.navlinksdisplay = false;
               // Get the status of last test by calling werknemer in DB
               var responsesPromise = Functions.getResponsesPerFuncUser(slaveEmail, 'functionering');
               var werknemer = responsesPromise.username;
               responsesPromise.data.then(function(snapshot) {
+                firebase.database().ref('klanten').orderByChild("email").equalTo($scope.slaveddmodel[0]).once("value", function(snapshot) {
+                  Store.setResults('slavedata', snapshot.val());
+                })
                 var responsesSlave = snapshot.val();
-                console.log(responsesSlave);
+                //console.log(responsesSlave);
                 if (responsesSlave !== undefined && responsesSlave !== null){
                   var funcData = Functions.getFuncTrajects(responsesSlave);
+                  //console.log(funcData);
                   var type = funcData.status == 'active' ? 'existing' : 'new';
                   if (funcData.funcnr == 1 && type == 'existing') $scope.noarchivedisplay = true;
                   var results = {user: werknemer, traject: 'traject-' + funcData.funcnr};
-                  Store.setResults('funcresults', results);                }
+                  // Store funcresults specifically for results page
+                  Store.setResults('funcresults', results);
+                  var trajectnr = funcData.statusBossTest == 'closed' ? funcData.funcnr : funcData.funcnr - 1;
+                }
                 else {
                   var type = 'new';
+                  var funcData = {};
+                  funcData.funcnr = undefined;
                   $scope.noarchivedisplay = true;
                 }
                 if (type == 'existing') {
@@ -84,9 +93,13 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
                     }
                   }
                 }
+                // Store funcdata for fluent navigation between func pages and set navigation tabs: only when there is a traject so there are results/agreements/archive
+                Store.setResults('funcdata', {role: roleCat, werknemer: werknemer, trajectnr: trajectnr});
                 $scope.$apply(function(){
+                  if (trajectnr > 0) $scope.navlinksdisplay = true;
                   $scope.slaveselected = true;
                 });
+
                 $scope.startTest = function(){
                   doTest(type, 'leidinggevende', funcData.funcnr, werknemer, responsesSlave);
                 }
@@ -94,15 +107,11 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
 
             }
           };
-
-          // 5) Bekijk ontwikkelingstraject dat door werknemer is opgesteld --> Naar ontwikkelingstraject
+          // 5) Bekijk ontwikkelingstraject dat door werknemer is opgesteld --> Naar ontwikkelingstraject TODO
           break;
         case 'werknemer':
           $scope.slavestartdisplay = true;
-          $scope.slavestarteddisplay = false;
-          $scope.slavefinisheddisplay = false;
-          $scope.activetrajectdisplay = false;
-          $scope.viewagreementsdisplay = false;
+          $scope.slavestarteddisplay = $scope.slavefinisheddisplay = $scope.activetrajectdisplay = $scope.viewagreementsdisplay = $scope.navlinksdisplay = false;
           var statusTest = responses == undefined ? undefined : Functions.getFuncTrajects(responses.functionering).statusSlaveTest;
           var werknemer = data[0].username;
           if (status !== 'undefined'){
@@ -110,7 +119,9 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
             var type = funcData.status == 'active' && statusTest !== 'pending' ? 'existing' : 'new';
             if (funcData.funcnr == 1 && type == 'existing') $scope.noarchivedisplay = true;
             var results = {user: werknemer, traject: 'traject-' + funcData.funcnr};
+            // Store funcresults specifically for results page
             Store.setResults('funcresults', results);
+            var trajectnr = statusTest == 'closed' ? funcData.funcnr : funcData.funcnr - 1;
           }
           else {
             var type = 'new';
@@ -131,6 +142,10 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
               }
             }
           }
+          // Store funcdata for fluent navigation between func pages and set navigation tabs: only when there is a traject so there are results/agreements/archive
+          Store.setResults('funcdata', {role: roleCat, werknemer: werknemer, trajectnr: trajectnr});
+          if (trajectnr > 0) $scope.navlinksdisplay = true;
+
           $scope.startTest = function(){
             doTest(type, 'werknemer', funcData.funcnr, werknemer, responses.functionering);
           }
@@ -151,13 +166,13 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
     });
 
     function doTest(type, role, trajectnr, werknemer, responsesObj) {
-      console.log(type, role, trajectnr, werknemer, responsesObj);
+      //console.log(type, role, trajectnr, werknemer, responsesObj);
       var questions = data[2].functionering;
       trajectnr = trajectnr == null ? 1 : (type == 'new' && role == 'leidinggevende' ? trajectnr + 1 : trajectnr);
       var trajectStr = 'traject-' + trajectnr;
       if (type == 'existing') var responses = responsesObj == undefined ? undefined : responsesObj[trajectStr].test[role];
 
-      console.log(type, role, trajectStr, werknemer, responses);
+      //console.log(type, role, trajectStr, werknemer, responses);
       $scope.bossstartdisplay = false;
       $scope.slavestartdisplay = false;
 
@@ -236,10 +251,8 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
             evaluate(werknemer, responsesFin[trajectStr].test[role], trajectStr, role, 'regular', {sender: sender, receiver: receiver});
           });
         }
-        // Set a checked mark when question is answered - with timeout because of 0,5 second animation
-        setTimeout(function() {
-          $scope.checkedquestion[nr] = true;
-        }, 500);
+        // Set a checked mark when question is answered
+        $scope.checkedquestion[nr] = true;
       };
 
       $scope.prevQuestion = function(nr) {
@@ -290,5 +303,12 @@ function FuncTestCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPe
 
   $scope.viewAgreements = function(role) {
     $location.path('/functioneringsafspraken/' + role + '/view');
+  }
+
+  $scope.menuNav = function(tab){
+    var funcData = Store.getResults().funcdata;
+    if (tab == 'results') $location.path('functioneringsresults/' + funcData.role + '/' + funcData.werknemer + '/' + funcData.trajectnr);
+    else if (tab == 'agreements') $location.path('functioneringsafspraken/' + funcData.role + '/view/' + funcData.werknemer + '/' + funcData.trajectnr);
+    else if (tab == 'archive') $location.path('functioneringsarchief/' + funcData.role + '/' + funcData.werknemer);
   }
 }

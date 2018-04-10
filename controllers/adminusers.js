@@ -23,7 +23,18 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
   $scope.rolecustomTexts = {buttonDefaultText: 'Selecteer Rol(len)'};
   $scope.lgcustomTexts = {buttonDefaultText: 'Selecteer Leidinggevende'};
 
-
+  $scope.bedrijven = getBedrijven();
+  $scope.bedrijvenmodel = [];
+  $scope.bedrijfsettings = {checkBoxes: true,
+                            keyboardControls: true,
+                            selectionLimit: 1,
+                            showCheckAll: false,
+                            showUncheckAll: false,
+                            smartButtonMaxItems: 1,
+                            template: '{{option}}',
+                            smartButtonTextConverter(skip, option) { return option; }
+                           };
+  $scope.bedrijfcustomTexts = {buttonDefaultText: 'Selecteer Bedrijf'};
 
   Customers.then(function(data) {
     var email = data.email;
@@ -32,15 +43,19 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
       firebase.database().ref('klanten').orderByChild("email").equalTo(email).on("child_added", function(snapshot) {
         var role = snapshot.val().type;
         role = role.indexOf('superadmin') > -1 ? 'superadmin' : (role.indexOf('admin') > -1 ? 'admin' : undefined);
+        $scope.role = role;
         console.log(role);
 
         if (role == 'superadmin') {
           $scope.addusersdisplay = true;
           $scope.bedrijfdisplay = true;
-        } else if (role == 'admin') {
+          var bedrijf = 'WorkFit';
+        }
+        else if (role == 'admin') {
           $scope.addusersdisplay = true;
           var bedrijf = snapshot.val().bedrijf;
-        } else $location.path('/');
+        }
+        else $location.path('/');
         console.log(bedrijf);
 
         //Manage users display
@@ -54,7 +69,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
           }
           fbref.once("value", function(snapshot) {
             snapshot.forEach(function(childSnapshot) {
-              console.log(childSnapshot.val());
+              //console.log(childSnapshot.val());
               var types = childSnapshot.val().type.join();
               var userObj = {email: childSnapshot.val().email,
                              bedrijf: childSnapshot.val().bedrijf,
@@ -65,6 +80,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
               $scope.manageusers.push(userObj);
             });
             if ($scope.manageusers.length > 0) $scope.userlist = true;
+            console.log($scope.manageusers.length);
           });
         }
         displayUsers(false);
@@ -72,6 +88,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
         // Add users
         $scope.users = [{
           email: '',
+          naam: '',
           bedrijf: bedrijf,
           type: [],
           leidinggevende: []
@@ -91,6 +108,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
         $scope.addUser = function() {
           $scope.users.push({
             email: '',
+            naam: '',
             bedrijf: bedrijf,
             type: [],
             leidinggevende: []
@@ -105,6 +123,9 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
         // submitUsers
         $scope.submitUsers = function() {
           for (var i = 0; i < $scope.users.length; i++) {
+            var username = $scope.users[i].email.replace('.', '_');
+            username = username.replace('@', '_');
+            $scope.users[i].username = username;
             if ($scope.users[i].leidinggevende.length > 0) $scope.users[i].leidinggevende = $scope.users[i].leidinggevende[0];
             firebase.database().ref().child('klanten').push().set($scope.users[i]);
           }
@@ -118,22 +139,40 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
           });
           displayUsers(true);
         }
-        $scope.submitMultipleUsers = function() {
-          var commaSeparated = $scope.userlist.replace(/\n/g, ",").replace(/\s/g, "");
-          var userArray = commaSeparated.split(",");
-          console.log(userArray);
+        $scope.submitMultipleUsers = function(bedrijfSelected) {
+          bedrijf = bedrijfSelected.length == 1 ? bedrijfSelected[0] : bedrijf;
+
+          // Split input on linebreak to get array with commaseperated userdata
+          const userArray = $scope.multiinput.split(/\n/g);
           for (var i = 0; i < userArray.length; i++) {
             if (userArray[i] !== '') {
-              firebase.database().ref('klanten').orderByChild("email").equalTo(userArray[i]).once('value', function(snapshot) {
+              // Clean up spaces and split userdata
+              //var userData = userArray[i].replace(/\s/g, "");
+              var userData = userArray[i].split(',');
+              var email = userData[0].trim();
+              var name = userData[1].trim();
+              var types = userData[2].trim();
+              var username = email.replace('.', '_');
+              username = username.replace('@', '_');
+              var types = types.split('+');
+              console.log(types);
+              if (userData[2].indexOf('werknemer') > -1) var leidinggevende = userData[3].trim();
+              else var leidinggevende = '';
+
+              firebase.database().ref('klanten').orderByChild("email").equalTo(email).once('value', function(snapshot) {
                 if (snapshot.val() == null) {
                   var userObj = {
-                    email: userArray[i],
+                    email: email,
+                    naam: name,
                     bedrijf: bedrijf,
-                    type: type
+                    type: types,
+                    username: username,
+                    leidinggevende: leidinggevende
                   };
-                  firebase.database().ref().child('klanten').push().set(userObj);
+                  console.log(userObj);
+                  //firebase.database().ref().child('klanten').push().set(userObj);
                 } else {
-                  alert('E-mailadres ' + userArray[i] + ' is al bekend bij WorkFit')
+                  alert('E-mailadres ' + email + ' is al bekend bij WorkFit')
                 }
               });
             }
@@ -149,26 +188,23 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
     if (rollen.indexOf('werknemer') !== -1) isEmp = true;
     return isEmp;
   }
-}
 
-/*
-Customers.then(function(data) {
-  var email = data.email;
-  data.customers.then(function(customers) {
-    firebase.database().ref('klanten').orderByChild("email").equalTo(email).on("child_added", function(snapshot) {
-      var role = snapshot.val().type;
-      console.log(role);
-
+  function getBedrijven(){
+    var bedrijfArr = []
+    firebase.database().ref('bedrijven').once("value", function(snapshot) {
+      snapshot.forEach(function(childSnapshot) {
+        bedrijfArr.push(childSnapshot.val());
+      });
     });
-  });
-});
+    return bedrijfArr;
+  }
 
+  // Get original setting for sending invitation mail
+  firebase.database().ref('questions/settings/send_invitation').once("value", function(snapshot) {
+    $scope.sendMail = snapshot.val();
+  })
+  $scope.changed = function(bin){
+    firebase.database().ref('questions/settings/send_invitation').set(bin);
+  }
 
-UserData.then(function(userData) {
-  document.getElementById('spinner').style.display = 'none';
-  var role = userData.type;
-  console.log(role);
-
-});
-*/
-
+}
