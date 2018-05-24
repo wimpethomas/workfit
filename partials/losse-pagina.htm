@@ -1,0 +1,31 @@
+<div id="content">
+  <div ng-if="notifsettings">
+    <p class="notify">
+      Gebruik je Chrome, dan is het makkelijkst om naar <a href="https://workfit-pmo.nl">workfit-pmo.nl</a> te gaan en links boven in de adresbalk op het slotje te klikken. Bij Notificaties staat dan Geblokkeerd. Via Site settings kun je vervolgens alsnog de notificaties aanzetten.<br>
+      Kom je er niet uit, kijk dan <a href="https://support.google.com/chrome/answer/3220216">hier</a> hoe je de notificaties op een andere manier kunt aanzetten.
+    </p>
+    <p class="notify">
+      Gebruik je Firefox, klik rechts boven in de browser op het “hamburger” menu icoon en selecteer Opties in het drop-down menu. Klik in het tab dat opent op Content en vervolgens, onder het kopje Notificaties subheading, klik 'Kies...'<br>
+      Selecteer daarna in het pop-up venster dat opent workfit-pmo.nl en accepteer de notificaties.
+    </p>
+  </div>
+
+  <div ng-if="noaccess">
+    <p class="notify" ng-if="demouser">
+      Je hebt geen toegang tot de opgevraagde pagina, omdat je tijdelijke gratis account is verlopen. Wil je gebruik blijven maken van WorkFit, neem met ons <a href="http://www.workfit-pmo.org/contact">contact</a> op.
+    </p>
+    <p class="notify" ng-if="nocompany">
+      Je account geeft geen toegang tot deze functionaliteit, omdat je niet als leidinggevende of werknemer bent opgegeven. Denk je dat je wel toegang zou moeten hebben, neem dan contact op met de HR-afdeling / medewerker.
+    </p>
+    <p class="notify" ng-if="noadmin">
+      Je hebt geen toegang tot de opgevraagde pagina, omdat je niet administrator van een bedrijf bent. Denk je dat je wel toegang zou moeten hebben, neem dan <a href="http://www.workfit-pmo.org/contact">contact</a> met ons op.
+    </p>
+    <p class="notify" ng-if="nosuperadmin">
+      Je hebt geen toegang tot de opgevraagde pagina, omdat je geen administrator van WorkFit bent.
+    </p>
+
+    <p class="notify" ng-if="default">
+      Je hebt geen toegang tot de opgevraagde pagina.
+    </p>
+  </div>
+</div>

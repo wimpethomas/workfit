@@ -7,7 +7,7 @@ angular.module('workfit')
 
 // Note: There are several exemptions build in because of coupling with functioneringsgedeelte. Should probably be changed in future versions
 
-function ImprovementResultsCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPerUser, Store, Examples, Gebieden, Functions) {
+function ImprovementResultsCtrl($scope, $location, $routeParams, QuestionsNew, ResponsesPerUser, UserData, Store, Examples, Gebieden, Functions) {
   var storedGebied = Store.getResults().resultgebied;
   var storedTestnr = Store.getResults().testnr;
   var urlGebied = $routeParams.gebied;
@@ -58,82 +58,90 @@ function ImprovementResultsCtrl($scope, $location, $routeParams, QuestionsNew, R
     //console.log(type, gebied);
     var gebiedWf = urlGebied == 'functionering' ? 'functionering' : gebied;
     resultnr = urlGebied == 'functionering' ? parseInt(urlTestnr) : resultnr;
-    Promise.all([QuestionsNew, ResponsesPerUser]).then(function(data) {
-      var username = data[1].username;
-      data[1].responses.then(function(responses) {
-        var responses = responses.advies;
-        var resultsObj = {};
-        var lastResultsObj = {};
-        // Last results are needed for any view because we want to display the tabs in any view.
-        // But with current design responses loop is run twice in worst case. Once for getting last results and one to get metadata. For now okay.
-        for (var gebiedInDB in responses) {
-          var lrpg = Functions.lastResultPerGebied(responses, gebiedInDB, 'advies', 'started');
-          lastResultsObj[gebiedInDB] = lrpg;
-          if (gebiedInDB !== 'functionering') lastResultsObj[gebiedInDB].youtube = data[0].profile.youtube[gebiedInDB];
-        }
-        resultsObj.lastresults = lastResultsObj;
-        switch (type) {
-          case 'prefillednew':
-            var resultStr = 'advies-' + resultnr;
-            var results = responses !== undefined ? responses[gebiedWf] : undefined;
-            results = results !== undefined ? responses[gebiedWf][resultStr] : undefined;
-            var onderdelen = urlGebied !== 'functionering' ? Store.getResults().onderdelen[gebied].main : data[0].profile.ontwikkeling[gebied];
-            var onderdeel = urlGebied !== 'functionering' ? Store.getResults().onderdelen[gebied].meta.lowest : 'functionering';
-            var personality = Store.getResults().personality;
 
-            // If there isn't a lowest onderdeel (all onderdelen above 0.5) and not coming from functionering then display movie
-            if (!onderdeel) {
-              $scope.playMovie('nolowest');
-              $scope.ytId = data[0].profile.youtube[gebied];
-              return;
-            }
-            // Make a new ontwikkeltraject if (1) there isn't a database entry for this gebied/resultnr combination or (2) nulltest for that gebied (overwrite existing traject)
-            else if (results == undefined || resultStr == 'advies-null') {
-              if (urlGebied !== 'functionering') var trait = getTrait(onderdelen[onderdeel], personality);
-              else var trait = {trait: 'default'};
-              var results = {newadv: true};
-              if (trait.trait == 'default'){
-                results.solution = onderdelen[onderdeel].default.solution;
-                results.roadmap = Object.values(onderdelen[onderdeel].default.roadmap);
+    Promise.all([QuestionsNew, ResponsesPerUser, UserData]).then(function(data) {
+      // Role based: If demo user with expired account redirect
+      var access = Functions.getAccess('allButDemoExpired', data[2].type, data[2].datum, now);
+      if(!access) {
+        $scope.$apply(function() {$location.path('/pagina/geen-toegang/demo-user'); })
+      }
+      else {
+        var username = data[1].username;
+        data[1].responses.then(function(responses) {
+          var responses = responses.advies;
+          var resultsObj = {};
+          var lastResultsObj = {};
+          // Last results are needed for any view because we want to display the tabs in any view.
+          // But with current design responses loop is run twice in worst case. Once for getting last results and one to get metadata. For now okay.
+          for (var gebiedInDB in responses) {
+            var lrpg = Functions.lastResultPerGebied(responses, gebiedInDB, 'advies', 'started');
+            lastResultsObj[gebiedInDB] = lrpg;
+            if (gebiedInDB !== 'functionering') lastResultsObj[gebiedInDB].youtube = data[0].profile.youtube[gebiedInDB];
+          }
+          resultsObj.lastresults = lastResultsObj;
+          switch (type) {
+            case 'prefillednew':
+              var resultStr = 'advies-' + resultnr;
+              var results = responses !== undefined ? responses[gebiedWf] : undefined;
+              results = results !== undefined ? responses[gebiedWf][resultStr] : undefined;
+              var onderdelen = urlGebied !== 'functionering' ? Store.getResults().onderdelen[gebied].main : data[0].profile.ontwikkeling[gebied];
+              var onderdeel = urlGebied !== 'functionering' ? Store.getResults().onderdelen[gebied].meta.lowest : 'functionering';
+              var personality = Store.getResults().personality;
+
+              // If there isn't a lowest onderdeel (all onderdelen above 0.5) and not coming from functionering then display movie
+              if (!onderdeel) {
+                $scope.playMovie('nolowest');
+                $scope.ytId = data[0].profile.youtube[gebied];
+                return;
               }
-              else {
-                results.solution = onderdelen[onderdeel][trait.trait][trait.highlow].solution;
-                results.roadmap = Object.values(onderdelen[onderdeel][trait.trait][trait.highlow].roadmap);
+              // Make a new ontwikkeltraject if (1) there isn't a database entry for this gebied/resultnr combination or (2) nulltest for that gebied (overwrite existing traject)
+              else if (results == undefined || resultStr == 'advies-null') {
+                if (urlGebied !== 'functionering') var trait = getTrait(onderdelen[onderdeel], personality);
+                else var trait = {trait: 'default'};
+                var results = {newadv: true};
+                if (trait.trait == 'default'){
+                  results.solution = onderdelen[onderdeel].default.solution;
+                  results.roadmap = Object.values(onderdelen[onderdeel].default.roadmap);
+                }
+                else {
+                  results.solution = onderdelen[onderdeel][trait.trait][trait.highlow].solution;
+                  results.roadmap = Object.values(onderdelen[onderdeel][trait.trait][trait.highlow].roadmap);
+                }
+                console.log(onderdelen, onderdeel);
+                // Determine if personality test results are counted in or not (treshold is a max below 5 for extraversie en vriendelijkheid (completely random :-))
+                if (urlGebied !== 'functionering') {
+                  if (personality.extraversie.max > 5 && personality.vriendelijkheid.max > 5) $scope.personalitydisplay = true;
+                }
               }
-              console.log(onderdelen, onderdeel);
-              // Determine if personality test results are counted in or not (treshold is a max below 5 for extraversie en vriendelijkheid (completely random :-))
-              if (urlGebied !== 'functionering') {
-                if (personality.extraversie.max > 5 && personality.vriendelijkheid.max > 5) $scope.personalitydisplay = true;
-              }
-            }
-            else type = 'detailview';
-            resultsObj[gebied] = {
-              resultnr: resultnr,
-              results: results,
-              resultstr: resultStr,
-              youtube: data[0].profile.youtube[gebied]
-            };
-            break;
-          case 'detailview':
-            var resultStr = 'advies-' + resultnr;
-            var results = responses[gebied][resultStr];
-            resultsObj[gebied] = {
-              resultnr: resultnr,
-              results: results,
-              resultstr: resultStr,
-              youtube: data[0].profile.youtube[gebied]
-            };
-            break;
-          case 'gebiedview':
-            // resultsObj is different in this case; it contains metadata per result
-            var mpr = Functions.metadataPerResult(responses, gebied, 'advies');
-            resultsObj[gebied] = {
-              metadata: mpr
-            };
-            break;
-        }
-        getViews(resultsObj, username, type);
-      });
+              else type = 'detailview';
+              resultsObj[gebied] = {
+                resultnr: resultnr,
+                results: results,
+                resultstr: resultStr,
+                youtube: data[0].profile.youtube[gebied]
+              };
+              break;
+            case 'detailview':
+              var resultStr = 'advies-' + resultnr;
+              var results = responses[gebied][resultStr];
+              resultsObj[gebied] = {
+                resultnr: resultnr,
+                results: results,
+                resultstr: resultStr,
+                youtube: data[0].profile.youtube[gebied]
+              };
+              break;
+            case 'gebiedview':
+              // resultsObj is different in this case; it contains metadata per result
+              var mpr = Functions.metadataPerResult(responses, gebied, 'advies');
+              resultsObj[gebied] = {
+                metadata: mpr
+              };
+              break;
+          }
+          getViews(resultsObj, username, type);
+        });
+      }
     });
   }
 

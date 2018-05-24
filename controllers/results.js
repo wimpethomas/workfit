@@ -1,7 +1,7 @@
 angular.module('workfit')
 .controller('ResultsController', ResultsCtrl);
 
-function ResultsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNew, ResponsesPerUser, ResponseOptions, Store, Gebieden, Functions) {
+function ResultsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNew, ResponsesPerUser, UserData, ResponseOptions, Store, Gebieden, Functions) {
   $scope.profile = {};
   var storedResults = Store.getResults().testresults;
   var storedTestnr = Store.getResults().testnr; // Set in /tests (if coming from 'losse' test: storedTestnr = null).
@@ -97,81 +97,88 @@ function ResultsCtrl($scope, $location, $routeParams, $firebaseObject, Questions
 
   function getData(type, gebied, resultnr, storedresults) {
     //console.log(type);
-    Promise.all([QuestionsNew, ResponsesPerUser]).then(function(data) {
-      var username = data[1].username;
-      var profile = data[0].profile;
-      data[1].responses.then(function(responses) {
-        var testResults = responses.test;
-        var advices = responses.advies;
-        var resultsObj = {};
-        var lastResultsObj = {};
+    Promise.all([QuestionsNew, ResponsesPerUser, UserData]).then(function(data) {
+      // Role based: If demo user with expired account redirect
+      var access = Functions.getAccess('allButDemoExpired', data[2].type, data[2].datum);
+      if(!access) {
+        $scope.$apply(function() {$location.path('/pagina/geen-toegang/demo-user'); })
+      }
+      else {
+        var username = data[1].username;
+        var profile = data[0].profile;
+        data[1].responses.then(function(responses) {
+          var testResults = responses.test;
+          var advices = responses.advies;
+          var resultsObj = {};
+          var lastResultsObj = {};
 
-        // When coming from finished test, get data from results Store and add niveaus (wondering if this is a gain in performance compared to DB retrieval)
-        // Only difference from DB retrieval (else case) is that not all gebieden are retrieved and stored in resultsObj, but only the one from the test.
-        if (type == 'direct') {
-          for (var storedGebied in storedresults) {
-            lastResultsObj[storedGebied] = {};
-            lastResultsObj[storedGebied].results = {};
-            lastResultsObj[storedGebied].results.vals = storedresults[storedGebied];
-            lastResultsObj[storedGebied].onderdelen = profile.ontwikkeling[storedGebied];
-            Functions.addNiveaus(lastResultsObj[storedGebied].results, profile[storedGebied]);
+          // When coming from finished test, get data from results Store and add niveaus (wondering if this is a gain in performance compared to DB retrieval)
+          // Only difference from DB retrieval (else case) is that not all gebieden are retrieved and stored in resultsObj, but only the one from the test.
+          if (type == 'direct') {
+            for (var storedGebied in storedresults) {
+              lastResultsObj[storedGebied] = {};
+              lastResultsObj[storedGebied].results = {};
+              lastResultsObj[storedGebied].results.vals = storedresults[storedGebied];
+              lastResultsObj[storedGebied].onderdelen = profile.ontwikkeling[storedGebied];
+              Functions.addNiveaus(lastResultsObj[storedGebied].results, profile[storedGebied]);
+            }
+            resultsObj.lastresults = lastResultsObj;
           }
-          resultsObj.lastresults = lastResultsObj;
-        }
-        else {
-          // When coming from menu (or page refresh) get data from DB and add niveaus
-          // Last results are needed for any view because we want to display the tabs in any view.
-          for (var gebiedInDB in testResults) {
-            var lastTestPerGebied = Functions.lastResultPerGebied(testResults, gebiedInDB, 'test', 'closed');
-            var lastAdviesPerGebied = Functions.lastResultPerGebied(advices, gebiedInDB, 'advies', 'started');
-            if (lastTestPerGebied !== undefined) {
-              lastTestPerGebied.results = Functions.rewriteDBResults(lastTestPerGebied.results, gebiedInDB, lastTestPerGebied.results.rewritten);
-              Functions.addNiveaus(lastTestPerGebied.results, profile[gebiedInDB]);
-              lastResultsObj[gebiedInDB] = lastTestPerGebied;
-              // Has a corresponding advice if resultnrs of test and advice are matching
-              if (lastAdviesPerGebied !== undefined) lastResultsObj[gebiedInDB].hasadvicedisplay = lastAdviesPerGebied.resultnr == lastTestPerGebied.resultnr ? true : false;
-              lastResultsObj[gebiedInDB].onderdelen = profile.ontwikkeling[gebiedInDB];
+          else {
+            // When coming from menu (or page refresh) get data from DB and add niveaus
+            // Last results are needed for any view because we want to display the tabs in any view.
+            for (var gebiedInDB in testResults) {
+              var lastTestPerGebied = Functions.lastResultPerGebied(testResults, gebiedInDB, 'test', 'closed');
+              var lastAdviesPerGebied = Functions.lastResultPerGebied(advices, gebiedInDB, 'advies', 'started');
+              if (lastTestPerGebied !== undefined) {
+                lastTestPerGebied.results = Functions.rewriteDBResults(lastTestPerGebied.results, gebiedInDB, lastTestPerGebied.results.rewritten);
+                Functions.addNiveaus(lastTestPerGebied.results, profile[gebiedInDB]);
+                lastResultsObj[gebiedInDB] = lastTestPerGebied;
+                // Has a corresponding advice if resultnrs of test and advice are matching
+                if (lastAdviesPerGebied !== undefined) lastResultsObj[gebiedInDB].hasadvicedisplay = lastAdviesPerGebied.resultnr == lastTestPerGebied.resultnr ? true : false;
+                lastResultsObj[gebiedInDB].onderdelen = profile.ontwikkeling[gebiedInDB];
+              }
+            }
+            resultsObj.lastresults = lastResultsObj;
+            switch (type) {
+              case 'detailview':
+                var resultStr = 'test-' + resultnr;
+                var resultsDB = testResults[gebied][resultStr];
+                var results = Functions.rewriteDBResults(resultsDB, gebied, resultsDB.rewritten);
+                var hasadvicedisplay = false;
+                if (advices !== undefined) {
+                  if (advices[gebied] !== undefined) var hasadvicedisplay = advices[gebied]['advies-' + resultnr] !== undefined ? true : false;
+                }
+                Functions.addNiveaus(results, profile[gebied]);
+                resultsObj[gebied] = {
+                  resultnr: resultnr,
+                  results: results,
+                  resultstr: resultStr,
+                  hasadvicedisplay: hasadvicedisplay,
+                  onderdelen: profile.ontwikkeling[gebied]
+                };
+                break;
+              case 'gebiedview':
+                // resultsObj is different in this case; it contains metadata per result
+                var mpr = Functions.metadataPerResult(testResults, gebied, 'test');
+                resultsObj[gebied] = {
+                  metadata: mpr
+                };
+                break;
             }
           }
-          resultsObj.lastresults = lastResultsObj;
-          switch (type) {
-            case 'detailview':
-              var resultStr = 'test-' + resultnr;
-              var resultsDB = testResults[gebied][resultStr];
-              var results = Functions.rewriteDBResults(resultsDB, gebied, resultsDB.rewritten);
-              var hasadvicedisplay = false;
-              if (advices !== undefined) {
-                if (advices[gebied] !== undefined) var hasadvicedisplay = advices[gebied]['advies-' + resultnr] !== undefined ? true : false;
-              }
-              Functions.addNiveaus(results, profile[gebied]);
-              resultsObj[gebied] = {
-                resultnr: resultnr,
-                results: results,
-                resultstr: resultStr,
-                hasadvicedisplay: hasadvicedisplay,
-                onderdelen: profile.ontwikkeling[gebied]
-              };
-              break;
-            case 'gebiedview':
-              // resultsObj is different in this case; it contains metadata per result
-              var mpr = Functions.metadataPerResult(testResults, gebied, 'test');
-              resultsObj[gebied] = {
-                metadata: mpr
-              };
-              break;
-          }
-        }
-        // Finally, set personality in resultsObj
-        var personalityResults = responses.personality;
-        var personalityStatus = personalityResults !== undefined ? personalityResults.status : undefined;
-        var traits =  profile.personality;
-        var combotexts =  profile.combotekst;
-        var personalityScore = Functions.getPersScores(personalityResults, traits, 'pers');
-        Store.setResults('personality', personalityScore);
-        resultsObj.persoonlijkheid = {status: personalityStatus, traits: traits, combotexts: combotexts, score: personalityScore};
+          // Finally, set personality in resultsObj
+          var personalityResults = responses.personality;
+          var personalityStatus = personalityResults !== undefined ? personalityResults.status : undefined;
+          var traits =  profile.personality;
+          var combotexts =  profile.combotekst;
+          var personalityScore = Functions.getPersScores(personalityResults, traits, 'pers');
+          Store.setResults('personality', personalityScore);
+          resultsObj.persoonlijkheid = {status: personalityStatus, traits: traits, combotexts: combotexts, score: personalityScore};
 
-        getViews(resultsObj, type);
-      });
+          getViews(resultsObj, type);
+        });
+      }
     });
   }
 

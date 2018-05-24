@@ -1,6 +1,6 @@
 angular.module('workfit').controller('AdminUsersController', AdminUsersCtrl);
 
-function AdminUsersCtrl($scope, $location, UserData, Customers) {
+function AdminUsersCtrl($scope, $location, Customers) {
   $scope.roledataSuperAdm = ["superadmin", "admin", "regular", "werknemer", "leidinggevende"];
   $scope.roledataAdm = ["werknemer", "leidinggevende"];
   $scope.rolesettings = {checkBoxes: true,
@@ -55,7 +55,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
           $scope.addusersdisplay = true;
           var bedrijf = snapshot.val().bedrijf;
         }
-        else $location.path('/');
+        else $location.path('/pagina/geen-toegang/noadmin');
         console.log(bedrijf);
 
         //Manage users display
@@ -193,7 +193,7 @@ function AdminUsersCtrl($scope, $location, UserData, Customers) {
     var bedrijfArr = []
     firebase.database().ref('bedrijven').once("value", function(snapshot) {
       snapshot.forEach(function(childSnapshot) {
-        bedrijfArr.push(childSnapshot.val());
+        bedrijfArr.push(childSnapshot.val().name);
       });
     });
     return bedrijfArr;

@@ -1,11 +1,20 @@
 angular.module('workfit')
 .controller('ImprovementController', ImprovementCtrl);
 
-function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, Store, Examples, Gebieden, Functions) {
+function ImprovementCtrl($scope, $location, $routeParams, ResponsesPerUser, UserData, Store, Examples, Gebieden, Functions) {
   var storedGebied = Store.getResults().resultgebied // Set in /results.
   var storedTestnr = Store.getResults().testnr; // Set in /tests (if coming from 'losse' test: storedAdvNr = null)
   var funcNr = $routeParams.fid; // If coming van functioneringstrajecten
   var nowString = Functions.setWfDate();
+
+  // Role based: If demo user with expired account redirect
+  UserData.then(function(data) {
+    var access = Functions.getAccess('allButDemoExpired', data.type, data.datum);
+    if(!access) {
+      $scope.$apply(function() {$location.path('/pagina/geen-toegang/demo-user'); })
+      return;
+    }
+  });
 
   // Define type
   if (storedGebied !== undefined && storedTestnr !== undefined) getData('known', storedGebied, storedTestnr);

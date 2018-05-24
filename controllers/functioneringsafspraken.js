@@ -1,7 +1,16 @@
 angular.module('workfit')
 .controller('FuncAfsprakenController', FuncAfsprakenCtrl);
 
-function FuncAfsprakenCtrl($scope, $location, $routeParams, ResponsesPerUser, Store, Gebieden, Functions) {
+function FuncAfsprakenCtrl($scope, $location, $routeParams, ResponsesPerUser, UserData, Store, Gebieden, Functions) {
+  // Role based: If no company user redirect
+  UserData.then(function(data) {
+    var access = Functions.getAccess('companyUser', data.type);
+    if(!access) {
+      $scope.$apply(function() {$location.path('/pagina/geen-toegang/nocompany'); })
+      return;
+    }
+  });
+
   var funcResults = Store.getResults().funcresults;
   var funcData = Store.getResults().funcdata;
   var role = $routeParams.role;

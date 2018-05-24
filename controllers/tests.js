@@ -1,7 +1,7 @@
 angular.module('workfit')
 .controller('TestsController', TestsCtrl);
 
-function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNew, ResponsesPerUser, ResponseOptions, Store, Gebieden, Functions) {
+function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNew, ResponsesPerUser, UserData, ResponseOptions, Store, Gebieden, Functions) {
   // Note: If a user exits screen after dropout on nulmeting/weekly, there is no tests in database. So after refreshing screen there is not an 'open' test.
   // Two variables that defines logic in /tests: (1) stored testgebieden, (2) gebieds URL parameter
   var storedGebieden = Store.getResults().testgebieden;
@@ -11,6 +11,15 @@ function TestsCtrl($scope, $location, $routeParams, $firebaseObject, QuestionsNe
   var nowString = Functions.setWfDate();
   // Set notification date for test reminder on days + 3 (in test 1)
   var datumRemString = Functions.setWfDate('notification', 3);
+
+  // Role based: If demo user with expired account redirect
+  UserData.then(function(data) {
+    var access = Functions.getAccess('allButDemoExpired', data.type, data.datum);
+    if(!access) {
+      $scope.$apply(function() {$location.path('/pagina/geen-toegang/demo-user'); })
+      return;
+    }
+  });
 
   // Define testgebieden en type
   if (urlTestNr !== undefined) preTest('unfinished', [urlGebied], parseInt(urlTestNr));

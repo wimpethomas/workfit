@@ -1,7 +1,7 @@
 angular.module('workfit')
 .service('Functions', getFunction);
 
-function getFunction(Gebieden, ResponseOptions) {
+function getFunction($http, Gebieden, ResponseOptions, UserData) {
 
   var lastResultPerGebied = function(responses, gebied, type, status) {
     // Returns last started/closed/all [type] results data per gebied ordered on datum
@@ -143,7 +143,8 @@ function getFunction(Gebieden, ResponseOptions) {
     if (type == 'notification') {
       datum.setDate(datum.getDate() + days);
       return datum.toISOString().split('T')[0];
-    } else return datum.toISOString();
+    }
+    else return datum.toISOString();
   }
 
   var getPersScores = function(responses, traits, ref) {
@@ -192,7 +193,7 @@ function getFunction(Gebieden, ResponseOptions) {
 
   var getResponsesPerFuncUser = function(user, dbentry) {
     if (user.indexOf('@') > -1){
-      var user = user.replace('.', '_');
+      var user = user.replace(/\./g, '_');
       user = user.replace('@', '_');
     }
     return {
@@ -256,6 +257,43 @@ function getFunction(Gebieden, ResponseOptions) {
     return false;
   }
 
+  function getIp() {
+    var url = "//freegeoip.net/json/";
+    return $http.get(url).then(function(response) {
+      var ipNoDots = response.data.ip.replace(/\./g, '_');
+      return ipNoDots;
+    });
+  }
+
+  function getAccess(accessLevel, roles, regDate, now) {
+    // There are 5 accessLevels: access for (1) 'all', (2) 'allButDemoExpired' ('regular' and up), (3) 'companyUser' ('leidinggevende' and up), (4) 'companyAdmin' ('admin' and up) and (5) 'workFitAdmin' ('superadmin')
+    // There are 6 role levels: "superadmin", "admin", "werknemer", "leidinggevende", "regular", "demo-user";
+    if (accessLevel == 'allButDemoExpired') {
+      if (roles.indexOf('demo-user') > -1 && roles.length == 1) {
+        now = now == undefined ? new Date() : now;
+        var timeRegistered = Date.parse(regDate);
+        var timeNow = Date.parse(now);
+        var timeDiff = (timeNow - timeRegistered) / (1000 * 60 * 60 * 24); // Number of days since registered
+        if (timeDiff > 28) return false;
+        else return true;
+      }
+      else return true;
+    }
+    else if (accessLevel == 'companyUser') {
+      if (roles.indexOf('superadmin') > -1 || roles.indexOf('admin') > -1 || roles.indexOf('werknemer') > -1 || roles.indexOf('leidinggevende') > -1) return true;
+      else return false;
+    }
+    else if (accessLevel == 'companyAdmin') {
+      if (roles.indexOf('superadmin') > -1 || roles.indexOf('admin') > -1) return true;
+      else return false;
+    }
+    else if (accessLevel == 'workFitAdmin') {
+      if (roles.indexOf('superadmin') > -1) return true;
+      else return false;
+    }
+    else return true;
+  }
+
   return {
     lastResultPerGebied: lastResultPerGebied,
     metadataPerResult: metadataPerResult,
@@ -267,6 +305,8 @@ function getFunction(Gebieden, ResponseOptions) {
     getResponsesPerFuncUser: getResponsesPerFuncUser,
     getFuncTrajects: getFuncTrajects,
     getFuncScores: getFuncScores,
-    valToKey: valToKey
+    valToKey: valToKey,
+    getIp: getIp,
+    getAccess: getAccess
   };
 }

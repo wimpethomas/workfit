@@ -38,7 +38,7 @@
         <div>&nbsp;</div>
         <div><b>(1) Begeleidingsniveau</b><img class="info" ng-mouseover="ibb = !ibb" ng-mouseleave="ibb = !ibb" src="/assets/info.png"><span ng-show="ibb" class="itext">Op basis van eigen vragenlijst</span></div>
         <div><i>Analyse:</i> {{ shBoss.title }}</div>
-        <div><i>Toelichting & Advies:</i> {{ shBoss.body }}</div>
+        <div><i>Toelichting & Advies:</i> <span ng-bind-html="shBoss.body">{{ shBoss.body }}</span></div>
         <div>&nbsp;</div>
         <div style="text-align: initial;"><b>(2) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ipb = !ipb" ng-mouseleave="ipb = !ipb" src="/assets/info.png"><span ng-show="ipb" class="itext">Op basis van {{ werknemer }}'s persoonlijkheidstest</span></div>
         <div ng-if="notshareddisplay">{{ werknemer }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>
@@ -57,7 +57,7 @@
         <div>&nbsp;</div>
         <div><b>(1) Begeleidingsniveau</b><img class="info" ng-mouseover="ibs = !ibs" ng-mouseleave="ibs = !ibs" src="/assets/info.png"><span ng-show="ibs" class="itext">Op basis van vragenlijst {{ werknemer }}</span></div>
         <div><i>Analyse:</i> {{ shSlave.title }}</div>
-        <div><i>Toelichting & Advies:</i> {{ shSlave.body }}</div>
+        <div><i>Toelichting & Advies:</i> <span ng-bind-html="shSlave.body">{{ shSlave.body }}</span></div>
         <div>&nbsp;</div>
         <div style="text-align: initial;"><b>(2) Persoonlijkheidskenmerken</b><img class="info" ng-mouseover="ips = !ips" ng-mouseleave="ips = !ips" src="/assets/info.png"><span ng-show="ips" class="itext">Op basis van {{ werknemer }}'s persoonlijkheidstest</span></div>
         <div ng-if="notshareddisplay">{{ werknemer }} heeft de resultaten van zijn persoonlijkheidstest (nog) niet met je gedeeld.</div>

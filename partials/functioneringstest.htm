@@ -1,7 +1,7 @@
 <div id="content">
   <div class="notify" ng-if="norightsdisplay">
     <p>Je account geeft geen toegang tot deze functionaliteit, omdat je niet als leidinggevende of werknemer bent opgegeven. Denk je dat je wel toegang zou moeten hebben, neem dan contact op met de HR-afdeling / medewerker.</p>
-    <p><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="norights" data-type="button">Terug</button></p>
+    <p><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="norights" data-type="button">Dashboard</button></p>
   </div>
 
   <div class="notify" ng-if="chooseroledisplay">
@@ -43,7 +43,7 @@
           <div>&nbsp;</div>
           <div ng-if="ontwikkelingsdisplay">
             <div>Het functioneringstraject zal worden afgerond zodra {{ slaveddmodel[0] }} met een ontwikkelingstraject aan de slag is gegaan. Wil je hier niet op wachten, rond dan zelf dit traject af.</div>
-            <div><button ng-click="closeTraject()" class="btn btn-blue" data-page="functionering-test" data-sub="rond-af" data-type="button">Rond traject af</button></div>
+            <div><button ng-click="closeTraject(user, funcnr)" class="btn btn-blue" data-page="functionering-test" data-sub="rond-af" data-type="button">Rond traject af</button></div>
           </div>
           <div>&nbsp;</div>
         </div>
@@ -58,7 +58,7 @@
   <div class="notify" ng-if="slavestartdisplay">
     <div ng-if="!activetrajectdisplay">
       <div>Er loopt geen traject voor een functioneringsgesprek momenteel. Klopt dit volgens jou niet, neem dan contact op met je leidinggevende.</div>
-      <div><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="notests" data-type="button">Nulmeting</button></div>
+      <div><button ng-click="getNulmeting()" class="btn btn-blue" data-page="functionering-test" data-sub="notests" data-type="button">Dashboard</button></div>
       <div>&nbsp;</div>
     </div>
     <div ng-if="activetrajectdisplay">
@@ -90,7 +90,7 @@
         </div>
         <div ng-if="ontwikkelingsdisplay">
           <div>Het functioneringsgesprek heeft plaatsgevonden en je bent akkoord met de afspraken. Verwerk deze output als je wilt tot een ontwikkelingstraject.</div>
-          <button ng-click="closeTraject()" class="btn btn-red" data-page="functionering-test" data-sub="rond-af" data-type="button">Sla over</button>
+          <button ng-click="closeTraject(user, funcnr)" class="btn btn-red" data-page="functionering-test" data-sub="rond-af" data-type="button">Sla over</button>
           <button ng-click="startOntwikkeling()" class="btn btn-blue" data-page="functionering-test" data-sub="start-ontwikkeling" data-type="button">Start ontwikkelingstraject</button>
         </div>
         <div>&nbsp;</div>

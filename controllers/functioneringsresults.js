@@ -1,12 +1,24 @@
 angular.module('workfit')
 .controller('FuncResultsController', FuncResultsCtrl);
 
-function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, QuestionsNew, Store, Gebieden, Functions) {
+function FuncResultsCtrl($scope, $location, $routeParams, $ocLazyLoad, ResponsesPerUser, QuestionsNew, UserData, Store, Gebieden, Functions) {
+  $ocLazyLoad.load('https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-sanitize.js');
+
+  // Role based: If no company user redirect
+  UserData.then(function(data) {
+    var access = Functions.getAccess('companyUser', data.type);
+    if(!access) {
+      $scope.$apply(function() {$location.path('/pagina/geen-toegang/nocompany'); })
+      return;
+    }
+  });
+
   // GA FUNCRESULTS EN FUNCDATA SAMENVOEGEN IN 1 OBJECT! VOORKOMT DUBBELE CODE BIJ HET DEFINIEREN VAN VARIABLE IN BEGIN EN DE $SCOPE.MENUNAV FUNCTIE
   var funcResults = Store.getResults().funcresults;
   var funcData = Store.getResults().funcdata;
   var urlRole = $routeParams.role;
   var user = $routeParams.user !== undefined ? $routeParams.user : funcResults.user;
+  $scope.user = user;
   var trajectStr = $routeParams.fid !== undefined ? 'traject-' + $routeParams.fid : (funcResults !== undefined ? funcResults.traject : undefined);
   var prevTrajectNr = $routeParams.fid !== undefined ? $routeParams.fid - 1 : (funcResults !== undefined ? parseInt(funcResults.traject.split('-')[1]) - 1 : undefined);
   var prevTrajectStr = prevTrajectNr < 1 || prevTrajectNr == undefined ? undefined : 'traject-' + prevTrajectNr;
@@ -62,6 +74,7 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
 
     google.charts.setOnLoadCallback(drawChart);
     var width = window.innerWidth > 700 ? 0.8 * 700 : 0.92 * window.innerWidth;
+    var chartWidth = window.innerWidth > 580 ? '98%' : '92%';
     var optionsGc = {
       width: width,
       height: 500,
@@ -70,14 +83,16 @@ function FuncResultsCtrl($scope, $location, $routeParams, ResponsesPerUser, Ques
       fontSize: 18,
       chartArea: {
         top: 0,
-        width: '100%',
+        right: 0,
+        width: chartWidth,
         height: '90%'
       },
       legend: { position: "none" },
+      vAxis: { textPosition: 'none' },
       hAxis: {
         slantedText: true,
-        slantedTextAngle: 15,
-        textStyle: {fontSize: 14}
+        slantedTextAngle: 20,
+        textStyle: {fontSize: 10}
       }
     };
   }

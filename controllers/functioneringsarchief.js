@@ -1,7 +1,16 @@
 angular.module('workfit')
 .controller('FuncArchiefController', FuncArchiefCtrl);
 
-function FuncArchiefCtrl($scope, $location, $routeParams, Store, Functions) {
+function FuncArchiefCtrl($scope, $location, $routeParams, UserData, Store, Functions) {
+  // Role based: If no company user redirect
+  UserData.then(function(data) {
+    var access = Functions.getAccess('companyUser', data.type);
+    if(!access) {
+      $scope.$apply(function() {$location.path('/pagina/geen-toegang/nocompany'); })
+      return;
+    }
+  });
+
   var funcResults = Store.getResults().funcresults;
   var funcData = Store.getResults().funcdata;
   var role = $routeParams.role;

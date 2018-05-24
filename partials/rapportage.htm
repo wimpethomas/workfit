@@ -1,0 +1,92 @@
+<div id="content">
+  <div moment-picker="startdate" format="D MMMM YYYY" locale="nl" today=true change="startDate(newValue, oldValue)" class="datepicker">
+    <span class="input-group-addon"><i class="mif-calendar icon"></i></span>
+    <input placeholder="Selecteer een begindatum" ng-model="startdate">
+  </div>
+
+  <div moment-picker="enddate" format="D MMMM YYYY" locale="nl" today=true change="endDate(newValue, oldValue)" class="datepicker">
+    <span class="input-group-addon"><i class="mif-calendar icon"></i></span>
+    <input placeholder="Selecteer een einddatum" ng-model="enddate">
+  </div>
+  <div>&nbsp;</div>
+
+  <div ng-show="spinnerdisplay" class="spinner">
+    <div class="rect1"></div>
+    <div class="rect2"></div>
+    <div class="rect3"></div>
+    <div class="rect4"></div>
+    <div class="rect5"></div>
+  </div>
+
+  <div ng-show="resultsdisplay" class="dateresult">
+    <h3>Nulmetingen:</h3>
+    <h4><span class="col_left">Aantal gedane nulmetingen:</span><span class="col_right">{{ nulmeting.aantal }}</span></h4>
+    <h4>Aantal personen per uitvalscategorie:</h4>
+    <table class="tableextra">
+      <tr>
+        <td width="70%"><i>Uitvalscategorie</i></td>
+        <td width="30%"><i>Aantal</i></td>
+      </tr>
+      <tr>
+        <td>geen</td>
+        <td>{{nulmeting.categorie.geen }}</td>
+      </tr>
+      <tr>
+        <td>1 gebied</td>
+        <td>{{nulmeting.categorie.een }}</td>
+      </tr>
+      <tr>
+        <td>2 gebieden</td>
+        <td>{{ nulmeting.categorie.twee }}</td>
+      </tr>
+      <tr>
+        <td>3 of meer gebieden</td>
+        <td>{{ nulmeting.categorie.meer }}</td>
+      </tr>
+    </table>
+    <h4>Scores en uitval per gebied:</h4>
+    <table class="tableextra">
+      <tr>
+        <td width="40%"><i>Gebied</i></td>
+        <td width="30%"><i>Gemiddelde score</i></td>
+        <td width="30%"><i>Aantal uitvallen</i></td>
+      </tr>
+      <tr ng-repeat="(gebied, data) in nulmeting.gebieden">
+        <td>{{ data.naam }}</td>
+        <td>{{ data.cijfer }}</td>
+        <td>{{ data.uitval }}</td>
+      </tr>
+    </table>
+    <div>&nbsp;</div>
+    <h3>Periodieke check:</h3>
+    <h4><span class="col_left">Aantal gedane checks:</span><span class="col_right">{{ weekly.aantal.checks }}</span></h4>
+    <h4><span class="col_left">Aantal users:</span><span class="col_right">{{ weekly.aantal.users }}</span></h4>
+    <h4><span class="col_left">Gemiddeld aantal checks per user:</span><span class="col_right">{{ weekly.aantal.average }}</span></h4>
+    <h4>Beantwoordingen op basisvraag:</h4>
+    <table class="tableextra">
+      <tr>
+        <td width="40%"><i>Hoofdgebied</i></td>
+        <td width="30%"><i>Positief</i></td>
+        <td width="30%"><i>Negatief</i></td>
+      </tr>
+      <tr ng-repeat="(hoofdgebied, data) in weekly.hoofdgebieden">
+        <td>{{ data.naam }}</td>
+        <td>{{ data.pos }}</td>
+        <td>{{ data.neg }}</td>
+      </tr>
+    </table>
+    <h4>Gemiddelde scores per gebied in geval van last:</h4>
+    <table class="tableextra">
+      <tr>
+        <td width="40%"><i>Subgebied</i></td>
+        <td width="30%"><i>Gemiddelde score</i></td>
+        <td width="30%"><i>Aantal</i></td>
+      </tr>
+      <tr ng-repeat="(subgebied, data) in weekly.gebieden">
+        <td>{{ data.naam }}</td>
+        <td>{{ data.cijfer }}</td>
+        <td>{{ data.count }}</td>
+      </tr>
+    </table>
+  </div>
+</div>

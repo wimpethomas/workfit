@@ -61,9 +61,9 @@ p {
   padding-bottom: 10px;
 }
 .chart2 {
-  width: 94%;
+  width: 98%;
   margin: auto;
-  padding-bottom: 10px;
+  padding-bottom: 5px;
 }
 .notify, .questions {
   padding: 0 5%;
@@ -194,6 +194,9 @@ input[type=radio]:checked + label {
   padding: 10px 5%;
   margin: 0 auto;
   max-width: 700px;
+}
+h4 {
+  margin: 10px 0;
 }
 /*
 .button.menu, #profile_app .button.advies {

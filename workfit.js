@@ -1,13 +1,14 @@
 var config = {
-  apiKey: "AIzaSyD87-VF66Pqcdo1RiGesY7ReyNmOqrNrhQ",
-  authDomain: "workfit-staging.firebaseapp.com",
-  databaseURL: "https://workfit-staging.firebaseio.com",
-  projectId: "workfit-staging",
-  storageBucket: "workfit-staging.appspot.com",
-  messagingSenderId: "239348273347"
+  apiKey: "AIzaSyCPEHUsuIv1Ww2845q33QU_ohTu-MteDls",
+  authDomain: "workfit-adde0.firebaseapp.com",
+  databaseURL: "https://workfit-adde0.firebaseio.com",
+  projectId: "workfit-adde0",
+  storageBucket: "workfit-adde0.appspot.com",
+  messagingSenderId: "686177789160"
 };
 firebase.initializeApp(config);
 
+/*
 var uiConfig = {
   callbacks: {
     signInSuccess: function(currentUser, credential, redirectUrl) {
@@ -30,8 +31,9 @@ var uiConfig = {
 };
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+*/
 
-angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'ngSanitize', 'firebase', 'youtube-embed', 'angular-inview', 'angularjs-dropdown-multiselect'])
+angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'ngSanitize', 'firebase', 'youtube-embed', 'angular-inview', 'angularjs-dropdown-multiselect', 'moment-picker'])
 .directive('wfMenu', wfMenu)
 .directive('wfLogin', Login)
 .config(function($routeProvider) {
@@ -100,13 +102,9 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'ngSanitize', 'fir
     templateUrl: "partials/functioneringsarchief.htm",
     controller: FuncArchiefCtrl
   })
-  .when("/userdata", {
-    templateUrl: "partials/userdata.htm",
-    controller: UserCtrl
-  })
-  .when("/userlist", {
-    templateUrl: "partials/userlist.htm",
-    controller: UserListCtrl
+  .when("/rapportage", {
+    templateUrl: "partials/rapportage.htm",
+    controller: RapportageCtrl
   })
   .when("/admin", {
     templateUrl: "partials/admin.htm",
@@ -116,9 +114,9 @@ angular.module('workfit', ['ngRoute', 'ngTouch', 'ngAnimate', 'ngSanitize', 'fir
     templateUrl: "partials/adminusers.htm",
     controller: AdminUsersCtrl
   })
-  .when("/notifications-accept", {
-    templateUrl: "partials/notifications-accepteren.htm",
-    controller: NotifCtrl
+  .when("/pagina/:title/:param?", {
+    templateUrl: "partials/losse-pagina.htm",
+    controller: PageCtrl
   })
   .when("/0test", {
     templateUrl: "partials/0test.htm",
@@ -166,7 +164,8 @@ function getUserData($firebaseObject, User) {
       var email = userObj.email;
       var refR = firebase.database().ref('klanten').orderByChild("email").equalTo(email);
       return $firebaseObject(refR).$loaded();
-    } else return false;
+    }
+    else return false;
   }).then(function(userData) {
     var pushId = Object.keys(userData).pop();
     return userData[pushId];
@@ -177,7 +176,7 @@ function getResponsesPerUser($firebaseObject, User) {
   return User.then(function(userObj) {
     // If user is logged in
     if (userObj !== null && userObj !== 'anonymous') {
-      var username = userObj.email.replace('.', '_');
+      var username = userObj.email.replace(/\./g, '_');
       username = username.replace('@', '_');
       var refR = firebase.database().ref().child('responses/' + username);
       return {
@@ -221,7 +220,7 @@ function wfMenuCtrl($scope, UserData) {
   $scope.signOut = signOut;
 
   UserData.then(function(userObj) {
-    if (userObj !== null) {
+    if (userObj !== null && userObj !== undefined) {
       $scope.username = userObj.email;
       $scope.bedrijf = userObj.bedrijf;
     }
@@ -250,22 +249,27 @@ function Login() {
   };
 }
 
-function LoginCtrl($scope, User) {
+function LoginCtrl($scope, $location, User, Functions) {
+  var mode = $location.search().mode;
+
   User.then(function(data) {
     //console.log(data);
     if (data == 'anonymous') {
-      $scope.logindisplay = true;
+      if (mode == 'demo') $scope.signupdisplay = true;
+      else $scope.logindisplay = true;
       document.getElementById('wrapper').style.display = 'none';
     }
     else document.getElementById('loginunit').remove();
 
     $scope.login = function() {
+      document.getElementById('spinner').style.display = 'block';
       firebase.auth().signInWithEmailAndPassword($scope.email, $scope.password).then(function(user) {
-        console.log(user);
+        //console.log(user);
         firebase.auth.Auth.Persistence.LOCAL;
         location.reload();
       }).
       catch (function(error) {
+        document.getElementById('spinner').style.display = 'none';
         var errorCode = error.code;
         $scope.$apply(function() {
           if (errorCode == 'auth/invalid-email' || errorCode == 'auth/user-not-found') {
@@ -281,15 +285,31 @@ function LoginCtrl($scope, User) {
     }
 
     $scope.signup = function() {
-      var usersToCheck = firebase.database().ref('klanten').orderByChild("email").equalTo($scope.email).once("value").then(function(snapshot) {
+      // In case of individual users first create an entry in de database
+      var now = new Date();
+      var nowString = Functions.setWfDate();
+      if (mode == 'demo') {
+        var username = $scope.email.replace(/\./g, '_');
+        username = username.replace('@', '_');
+        firebase.database().ref().child('klanten').push().set({username: username, bedrijf: 'Demo', email: $scope.email, type: ['demo-user']});
+      }
+
+      // Then check on existing klanten in database and based on check register or display error
+      firebase.database().ref('klanten').orderByChild("email").equalTo($scope.email).once("value").then(function(snapshot) {
         return snapshot.val();
       }).then(function(registeredEmail) {
-        // Email is posted by company admin, so user can register with this email adress
+        // Email is posted by company admin, so user can register with this email adress. Also add registration date and IP to klant
         if (registeredEmail !== null) {
           firebase.auth().createUserWithEmailAndPassword($scope.email, $scope.password).then(function(user) {
             console.log(user);
-            firebase.auth.Auth.Persistence.LOCAL;
-            location.reload();
+            var pushId = Object.keys(registeredEmail)[0];
+            Functions.getIp().then(function(ip){
+              firebase.database().ref().child('klanten/' + pushId + '/ip').set(ip);
+              firebase.database().ref().child('klanten/' + pushId + '/datum').set(nowString);
+            }).then(function(){
+              firebase.auth.Auth.Persistence.LOCAL;
+              location.reload();
+            })
           }).
           catch (function(error) {
             var errorCode = error.code;
@@ -304,7 +324,8 @@ function LoginCtrl($scope, User) {
               }
             });
           });
-        } else {
+        }
+        else {
           $scope.$apply(function() {
             $scope.unrerror = 'Het e-mailadres is niet opgegeven door je bedrijf. Neem contact op met je H&R-medewerker.';
           });
@@ -333,7 +354,6 @@ function LoginCtrl($scope, User) {
 function ScreenCtrl($scope, User) {
   var deviceType = navigator.userAgent; // Maybe for future use
   var isMobile = window.innerWidth < 680;
-
   //$scope.removeLS = function() {localStorage.removeItem("screenMessage");}
 
   User.then(function(data) {
